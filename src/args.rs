@@ -1,9 +1,9 @@
-pub mod chars;
-pub mod hunts;
+pub mod chars_args;
+pub mod hunts_args;
 
 // Internals 
-use chars::CharsCommand;
-use hunts::HuntsCommand;
+use chars_args::CharsCommand;
+use hunts_args::HuntsCommand;
 
 // Externals 
 use clap::{Parser, Subcommand};
