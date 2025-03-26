@@ -1,43 +1,61 @@
-use serde::{Serialize, Deserialize};
+use std::fs;
+use std::path::Path;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Character {
+use dirs::data_dir;
+use rusqlite::{Connection, Error};
+
+
+pub fn init_local() {
+  let chibia = data_dir().unwrap().join("chibia");
   
-  // Character name
-  pub name: String,
+  if !Path::new(&chibia).exists()  {
+    fs::create_dir_all(&chibia)
+      .expect("Failed to make chibia dir");
+  }
 
-  // Character vocation
-  pub vocation: String,
+  let db_file = chibia.join("main.db");
 
-  // Character level
-  pub level: u16,
-
-  // Character skills
-  pub skills: CharSkills,
+  if !Path::new(&db_file).exists()  {
+    create_new_db().expect("Failed to make db file");
+  }
 
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct CharSkills {
-  
-  // Magic level
-  pub ml: u8,
+pub fn load_db() -> Result<Connection, Error> {
+  let db_file = data_dir().unwrap().join("chibia/main.db");
 
-  // Fist level
-  pub fl: u8,
+  let db = Connection::open(db_file)?;
 
-  // Sword level
-  pub sl: u8,
+  Ok(db)
+}
 
-  // Axe level
-  pub al: u8,
+pub fn create_new_db() -> Result<(), Error> {
+  let db = load_db()?;
 
-  // Club level
-  pub cl: u8,
+  db.execute(
+    "CREATE TABLE IF NOT EXISTS chars (
+      id              INTEGER PRIMARY KEY,
+      name            TEXT,
+      vocation        TEXT,
+      level           INTEGER,
+      magic_level     INTEGER,
+      fist_level      INTEGER,
+      sword_level     INTEGER,
+      axe_level       INTEGER,
+      club_level      INTEGER,
+      distance_level  INTEGER,
+      shielding_level INTEGER
+    )", ()
+  )?;
 
-  // Distance level
-  pub dl: u8,
+  db.execute(
+    "CREATE TABLE IF NOT EXISTS hunts (
+      id       INTEGER PRIMARY KEY,
+      char_id  INTEGER,
+      raw_xp_h REAL,
+      FOREIGN KEY (char_id) REFERENCES chars (id)
+    )", ()
+  )?;
 
-  // Shielding level
-  pub shl: u8,
+  Ok(())
 }

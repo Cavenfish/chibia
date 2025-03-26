@@ -10,15 +10,14 @@ use clap::{Parser, Subcommand};
 
 #[derive(Debug, Parser)]
 pub struct ChibiaArgs {
+
   #[clap(subcommand)]
-  pub entity_type: EntityType,
+  pub command: Chibia,
+
 } 
 
-
-// TODO: Add gear subcommand
-
 #[derive(Debug, Subcommand)]
-pub enum EntityType {
+pub enum Chibia {
   
   /// Create, update, delete or list characters
   Chars(CharsCommand),
