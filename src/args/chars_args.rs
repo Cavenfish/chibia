@@ -111,6 +111,7 @@ pub struct DeleteChar {
 pub struct ShowCharArgs {
 
   /// ID of character to show (omit to show all)
+  #[clap(long, default_value_t=0)]
   pub id: u32,
 
 }
