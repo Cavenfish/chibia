@@ -1,5 +1,5 @@
 use crate::db::load_db;
-use crate::args::chars_args::CharInfo;
+use crate::chars::args::CharInfo;
 
 use rusqlite::{Error};
 

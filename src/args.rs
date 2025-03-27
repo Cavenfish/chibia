@@ -1,6 +1,6 @@
 // Internals 
-use chars::args::CharsCommand;
-use hunts::args::HuntsCommand;
+use crate::chars::args::CharsCommand;
+use crate::hunts::args::HuntsCommand;
 
 // Externals 
 use clap::{Parser, Subcommand};

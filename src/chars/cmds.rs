@@ -1,6 +1,6 @@
 use crate::db::load_db;
-use crate::utils::get_char;
-use crate::args::chars_args::{
+use crate::chars::utils::get_char;
+use crate::chars::args::{
   CharsCommand, CharsSubcommand, CharInfo, 
   LevelUpChar, SkillUpChar, DeleteChar, ShowCharArgs
 };
