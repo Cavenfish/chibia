@@ -1,7 +1,7 @@
 mod db;
 mod args;
-mod cmds;
-mod utils;
+mod chars;
+mod hunts;
 
 // Internal
 use db::init_local;
