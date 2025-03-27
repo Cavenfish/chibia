@@ -1,3 +1,5 @@
+use crate::db::load_db;
+use crate::args::chars_args::CharInfo;
 
 use rusqlite::{Error};
 
@@ -35,5 +37,5 @@ pub fn get_char(id: u32) -> Result<CharInfo, Error> {
     })
   })?;
 
-  Ok(CharInfo)
+  Ok(row)
 }

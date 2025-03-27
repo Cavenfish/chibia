@@ -1,4 +1,9 @@
 use crate::db::load_db;
+use crate::utils::get_char;
+use crate::args::chars_args::{
+  CharsCommand, CharsSubcommand, CharInfo, 
+  LevelUpChar, SkillUpChar, DeleteChar, ShowCharArgs
+};
 
 pub fn handle_chars_cmd(cmd: CharsCommand) {
 
@@ -7,13 +12,13 @@ pub fn handle_chars_cmd(cmd: CharsCommand) {
     CharsSubcommand::LevelUp(cmd) => level_up_char(cmd),
     CharsSubcommand::SkillUp(cmd) => skill_up_char(cmd),
     CharsSubcommand::Delete(cmd) => delete_char(cmd),
-    CharsSubcommand::Show => show_chars(),
+    CharsSubcommand::Show(cmd) => handle_char_show(cmd),
   }
 
 }
 
 pub fn add_char(cmd: CharInfo) {
-  let db = load_db.expect("Failed to load DB");
+  let db = load_db().expect("Failed to load DB");
 
   db.execute(
     "INSERT INTO chars (
@@ -31,15 +36,15 @@ pub fn add_char(cmd: CharInfo) {
   
 }
 
-pub fn level_up_char() {
+pub fn level_up_char(cmd: LevelUpChar) {
 
 }
 
-pub fn skill_up_char() {
+pub fn skill_up_char(cmd: SkillUpChar) {
 
 }
 
-pub fn delete_char() {
+pub fn delete_char(cmd: DeleteChar) {
 
 }
 
