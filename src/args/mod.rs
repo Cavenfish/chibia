@@ -1,6 +1,3 @@
-pub mod chars_args;
-pub mod hunts_args;
-
 // Internals 
 use chars_args::CharsCommand;
 use hunts_args::HuntsCommand;
@@ -25,5 +22,6 @@ pub enum Chibia {
   /// Add, remove, list, or query hunt logs
   Hunts(HuntsCommand),
 }
+
 
 
