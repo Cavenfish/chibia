@@ -5,13 +5,23 @@ use dirs::data_dir;
 use rusqlite::{Connection, Error};
 
 
+fn maybe_make_path(path: &Path) {
+
+  if !path.exists() {
+    fs::create_dir_all(path)
+      .expect("Unable to make local dirs");
+  }
+
+}
+
 pub fn init_local() {
   let chibia = data_dir().unwrap().join("chibia");
+  let logdir = chibia.join("logs/data");
+  let tmpdir = chibia.join("logs/pending");
   
-  if !Path::new(&chibia).exists()  {
-    fs::create_dir_all(&chibia)
-      .expect("Failed to make chibia dir");
-  }
+  maybe_make_path(&chibia);
+  maybe_make_path(&logdir);
+  maybe_make_path(&tmpdir);
 
   let db_file = chibia.join("main.db");
 

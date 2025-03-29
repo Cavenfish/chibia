@@ -3,7 +3,7 @@ use crate::chars::args::CharsCommand;
 use crate::hunts::args::HuntsCommand;
 
 // Externals 
-use clap::{Parser, Subcommand};
+use clap::{Args, Parser, Subcommand};
 
 #[derive(Debug, Parser)]
 pub struct ChibiaArgs {

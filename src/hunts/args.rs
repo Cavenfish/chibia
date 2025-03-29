@@ -1,3 +1,5 @@
+use crate::args::ShowArgs;
+
 use clap::{Args, Subcommand};
 
 #[derive(Debug, Args)]
@@ -10,6 +12,9 @@ pub struct HuntsCommand {
 #[derive(Debug, Subcommand)]
 pub enum HuntsSubcommand {
 
+  /// Prep hunt logs for adding
+  Prep,
+
   /// Add new hunt logs
   Add(AddHunt),
 
@@ -20,7 +25,7 @@ pub enum HuntsSubcommand {
   Top(TopHunt),
 
   /// List all hunt logs
-  Show,
+  Show(ShowArgs),
 }
 
 #[derive(Debug, Args)]

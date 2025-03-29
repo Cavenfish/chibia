@@ -7,6 +7,7 @@ mod hunts;
 use db::init_local;
 use args::{ChibiaArgs, Chibia};
 use chars::cmds::handle_chars_cmd;
+use hunts::cmds::handle_hunts_cmd;
 
 // External 
 use clap::Parser;
@@ -20,8 +21,7 @@ fn main() {
 
   match args.command {
       Chibia::Chars(cmd) => handle_chars_cmd(cmd),
-      Chibia::Hunts(_) => todo!()
-      // Chibia::Hunts(cmd) => hunts_args(cmd),
+      Chibia::Hunts(cmd) => handle_hunts_cmd(cmd),
   };
     
 }
