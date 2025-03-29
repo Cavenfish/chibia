@@ -34,17 +34,17 @@ pub fn create_new_db() -> Result<(), Error> {
 
   db.execute(
     "CREATE TABLE IF NOT EXISTS chars (
-      id              INTEGER PRIMARY KEY,
-      name            TEXT,
-      vocation        TEXT,
-      level           INTEGER,
-      magic_level     INTEGER,
-      fist_level      INTEGER,
-      sword_level     INTEGER,
-      axe_level       INTEGER,
-      club_level      INTEGER,
-      distance_level  INTEGER,
-      shielding_level INTEGER
+      id        INTEGER PRIMARY KEY,
+      name      TEXT,
+      vocation  TEXT,
+      level     INTEGER,
+      magic     INTEGER,
+      fist      INTEGER,
+      sword     INTEGER,
+      axe       INTEGER,
+      club      INTEGER,
+      distance  INTEGER,
+      shielding INTEGER
     )", ()
   )?;
 

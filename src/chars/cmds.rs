@@ -1,5 +1,5 @@
 use crate::db::load_db;
-use crate::chars::utils::get_char;
+use crate::chars::utils::{get_char, get_all_chars};
 use crate::chars::args::{
   CharsCommand, CharsSubcommand, CharInfo, 
   LevelUpChar, SkillUpChar, DeleteChar, ShowCharArgs
@@ -22,9 +22,8 @@ pub fn add_char(cmd: CharInfo) {
 
   db.execute(
     "INSERT INTO chars (
-      name, vocation, level, magic_level, 
-      fist_level, sword_level, axe_level,
-      club_level, distance_level, shielding_level
+      name, vocation, level, magic, fist,
+      sword, axe, club, distance, shielding
     ) values (
       ?1, ?2, ?3, ?4, ?5,
       ?6, ?7, ?8, ?9, ?10
@@ -37,14 +36,34 @@ pub fn add_char(cmd: CharInfo) {
 }
 
 pub fn level_up_char(cmd: LevelUpChar) {
+  let db = load_db().expect("Failed to load DB");
+
+  db.execute(
+    "UPDATE chars SET level = level + ?1 WHERE id = ?2",
+    (cmd.n, cmd.id)
+  ).expect("Failed to update character level");
 
 }
 
 pub fn skill_up_char(cmd: SkillUpChar) {
+  let db = load_db().expect("Failed to load DB");
+
+  let tmp = format!(
+    "UPDATE chars SET {0} = {0} + ?1 WHERE id = ?2", 
+    &cmd.skill
+  );
+
+  db.execute(&tmp, (cmd.n, cmd.id))
+    .expect("Failed to update character level");
 
 }
 
 pub fn delete_char(cmd: DeleteChar) {
+  let db = load_db().expect("Failed to load DB");
+
+  db.execute(
+    "DELETE FROM chars WHERE id = ?1", (cmd.id,)
+  ).expect("Failed to delete character");
 
 }
 
@@ -70,5 +89,22 @@ pub fn show_char(id: u32) {
 }
 
 pub fn show_chars() {
+  let chars = get_all_chars().expect("Failed to query DB");
+
+  println!(
+    "{: <5} {: <15} {: <10} {: <10}",
+    "ID", "Vocation", "Name", "Level"
+  );
+
+  println!("{:-<55}", "");
+
+  for row in chars {
+
+    println!(
+      "{: <5} {: <15} {: <10} {: <10}",
+      row.id, &row.vocation, &row.name, row.level
+    );
+
+  }
 
 }

@@ -78,24 +78,29 @@ pub struct CharInfo {
 #[derive(Debug, Args)]
 pub struct LevelUpChar {
 
-  /// Name of character 
-  pub name: String,
+  /// ID of character
+  #[clap(short, long)]
+  pub id: u32,
 
   /// Number of levels to add
+  #[clap(short)]
   pub n: u8,
 }
 
 #[derive(Debug, Args)]
 pub struct SkillUpChar {
 
-  /// Name of character 
-  pub name: String,
+  /// ID of character
+  #[clap(short, long)]
+  pub id: u32,
 
   /// Skill to level up
+  #[clap(short, long)]
   pub skill: String,
 
   /// Number of levels to add
-  pub n_levels: u8,
+  #[clap(short)]
+  pub n: u8,
 
 }
 
@@ -103,6 +108,7 @@ pub struct SkillUpChar {
 pub struct DeleteChar {
 
   /// ID of character 
+  #[clap(short, long)]
   pub id: u32,
 
 }
