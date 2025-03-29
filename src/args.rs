@@ -22,3 +22,12 @@ pub enum Chibia {
   /// Add, remove, list, or query hunt logs
   Hunts(HuntsCommand),
 }
+
+#[derive(Debug, Args)]
+pub struct ShowArgs {
+
+  /// ID of character to show (omit to show all)
+  #[clap(long, default_value_t=0)]
+  pub id: u32,
+
+}

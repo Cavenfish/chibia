@@ -1,8 +1,9 @@
 use crate::db::load_db;
+use crate::args::ShowArgs;
 use crate::chars::utils::{get_char, get_all_chars};
 use crate::chars::args::{
   CharsCommand, CharsSubcommand, CharInfo, 
-  LevelUpChar, SkillUpChar, DeleteChar, ShowCharArgs
+  LevelUpChar, SkillUpChar, DeleteChar
 };
 
 pub fn handle_chars_cmd(cmd: CharsCommand) {
@@ -67,7 +68,7 @@ pub fn delete_char(cmd: DeleteChar) {
 
 }
 
-pub fn handle_char_show(cmd: ShowCharArgs) {
+pub fn handle_char_show(cmd: ShowArgs) {
 
   match cmd.id {
 

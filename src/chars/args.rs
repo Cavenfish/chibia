@@ -1,3 +1,5 @@
+use crate::args::ShowArgs;
+
 use clap::{Args, Subcommand};
 
 #[derive(Debug, Args)]
@@ -23,7 +25,7 @@ pub enum CharsSubcommand {
   Delete(DeleteChar),
 
   /// List all characters
-  Show(ShowCharArgs),
+  Show(ShowArgs),
 }
 
 #[derive(Debug, Args)]
@@ -109,15 +111,6 @@ pub struct DeleteChar {
 
   /// ID of character 
   #[clap(short, long)]
-  pub id: u32,
-
-}
-
-#[derive(Debug, Args)]
-pub struct ShowCharArgs {
-
-  /// ID of character to show (omit to show all)
-  #[clap(long, default_value_t=0)]
   pub id: u32,
 
 }
