@@ -6,7 +6,7 @@ use crate::hunts::parse::{read_hunt_json, HuntInfo};
 use dirs::data_dir;
 use rusqlite::{Error};
 
-pub fn prep_hunt_logs() {
+pub fn get_hunt_logs() -> Vec<fs::Path> {
 
   let tibia = data_dir().unwrap()
     .join("CipSoft GmbH/Tibia/packages/Tibia/log");
@@ -20,23 +20,7 @@ pub fn prep_hunt_logs() {
       .filter(|e| e.extension() == Some(json)),
   );
 
-  let tmpdir = data_dir().unwrap()
-    .join("chibia/data/pending");
-
-  for i in 0..json_files.len() {
-    let j = format!("{}.json", i);
-    let f = tmpdir.join(&j);
-
-    println!("{:?}", f);
-    println!("{:?}", json_files[i]);
-
-    fs::rename(&json_files[i], &f);
-
-    let d = read_hunt_json(&f);
-
-    println!("Pending Hunt {}:", i);
-    println!("{:#?}", d);
-  }
+  json_files
 }
 
 // pub fn get_hunt(id: u32) -> Result<HuntInfo, Error> {

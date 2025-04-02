@@ -3,7 +3,7 @@ use std::io::BufReader;
 use std::path::Path;
 
 use serde_json::from_reader;
-use serde::{Serialize, Deserialize};
+use serde::{de, Serialize, Deserialize, Deserializer};
 
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -69,4 +69,8 @@ pub fn read_hunt_json(file: &Path) -> HuntInfo {
   let d: HuntInfo = from_reader(reader).expect("Failed");
 
   d
+}
+
+fn de_from_str<'de, D>(deserializer: D) -> Result<i64, D::Error> {
+  
 }

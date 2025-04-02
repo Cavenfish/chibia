@@ -5,29 +5,17 @@ use dirs::data_dir;
 use rusqlite::{Connection, Error};
 
 
-fn maybe_make_path(path: &Path) {
-
-  if !path.exists() {
-    fs::create_dir_all(path)
+pub fn init_local() {
+  let chibia = data_dir().unwrap().join("chibia");
+  
+  if !chibia.exists() {
+    fs::create_dir_all(chibia)
       .expect("Unable to make local dirs");
   }
 
-}
-
-pub fn init_local() {
-  let chibia = data_dir().unwrap().join("chibia");
-  let logdir = chibia.join("logs/data");
-  let tmpdir = chibia.join("logs/pending");
-  
-  maybe_make_path(&chibia);
-  maybe_make_path(&logdir);
-  maybe_make_path(&tmpdir);
-
   let db_file = chibia.join("main.db");
 
-  if !Path::new(&db_file).exists()  {
-    create_new_db().expect("Failed to make db file");
-  }
+  init_db().expect("Failed to make db file");
 
 }
 
@@ -39,7 +27,7 @@ pub fn load_db() -> Result<Connection, Error> {
   Ok(db)
 }
 
-pub fn create_new_db() -> Result<(), Error> {
+fn init_db() -> Result<(), Error> {
   let db = load_db()?;
 
   db.execute(
@@ -60,10 +48,38 @@ pub fn create_new_db() -> Result<(), Error> {
 
   db.execute(
     "CREATE TABLE IF NOT EXISTS hunts (
-      id       INTEGER PRIMARY KEY,
-      char_id  INTEGER,
-      raw_xp_h REAL,
-      FOREIGN KEY (char_id) REFERENCES chars (id)
+      id        INTEGER PRIMARY KEY,
+      char_name TEXT,
+      balance   REAL,
+      damage    REAL,
+      damage_h  REAL,
+      healing   REAL,
+      healing_h REAL,
+      loot      REAL,
+      raw_xp    REAL,
+      raw_xp_h  REAL,
+      supplies  REAL,
+      xp        REAL,
+      xp_h      REAL,
+      FOREIGN KEY (char_name) REFERENCES chars (name)
+    )", ()
+  )?;
+
+  db.execute(
+    "CREATE TABLE IF NOT EXISTS mob_kills (
+      hunt_id INTEGER,
+      count   INTEGER,
+      name    TEXT,
+      FOREIGN KEY (hunt_id) REFERENCES hunts (id)
+    )", ()
+  )?;
+
+  db.execute(
+    "CREATE TABLE IF NOT EXISTS items_looted (
+      hunt_id INTEGER,
+      count   INTEGER,
+      name    TEXT,
+      FOREIGN KEY (hunt_id) REFERENCES hunts (id)
     )", ()
   )?;
 

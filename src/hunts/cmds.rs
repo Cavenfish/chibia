@@ -1,17 +1,19 @@
 use crate::db::load_db;
 use crate::args::ShowArgs;
-use crate::hunts::utils::prep_hunt_logs;
+use crate::hunts::utils::get_hunt_logs;
+use crate::hunts::parse::read_hunt_json;
 // use crate::hunts::utils::{get_all_hunts, get_hunt};
 use crate::hunts::args::{
   HuntsCommand, HuntsSubcommand, AddHunt,
   DeleteHunt, TopHunt, 
 };
 
+use dirs::data_dir;
+
 pub fn handle_hunts_cmd(cmd: HuntsCommand) {
 
   match cmd.command {
 
-    HuntsSubcommand::Prep => prep_hunt_logs(),
     HuntsSubcommand::Add(cmd) => add_hunt(cmd),
     HuntsSubcommand::Delete(cmd) => todo!(),//delete_hunt(cmd),
     HuntsSubcommand::Top(cmd) => todo!(),//top_hunt(cmd),
@@ -20,8 +22,27 @@ pub fn handle_hunts_cmd(cmd: HuntsCommand) {
   }
 }
 
-pub fn add_hunt(cmd: AddHunt) {
+pub fn add_hunts(cmd: AddHunt) {
+  let db = load_db().expect("Failed to load DB");
 
+  let logs = get_hunt_logs();
+
+  for log in logs {
+    let info = read_hunt_json(&log);
+
+    db.execute(
+      "INSERT INTO hunts (
+        char_name, balance, damage, damage_h,
+        healing, healing_h, loot, raw_xp, raw_xp_h,
+        supplies, xp, xp_h
+      ) values (
+        ?1, ?2, ?3, ?4, ?5, ?6,
+        ?7, ?8, ?9, ?10, ?11, ?12
+      )", (
+        &info.name, info.balance
+      )
+    ).expect("Failed to insert into table");
+  }
 }
 
 pub fn handle_hunt_show(cmd: ShowArgs) {

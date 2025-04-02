@@ -12,9 +12,6 @@ pub struct HuntsCommand {
 #[derive(Debug, Subcommand)]
 pub enum HuntsSubcommand {
 
-  /// Prep hunt logs for adding
-  Prep,
-
   /// Add new hunt logs
   Add(AddHunt),
 
@@ -32,18 +29,19 @@ pub enum HuntsSubcommand {
 pub struct AddHunt {
 
   /// Character used on hunt
+  #[clap(long, default_value="Uknown")]
   pub name: String,
 
   /// Location of hunt
-  pub location: String,
-
-  /// Experience multiplier
-  pub multiplier: f32,
+  #[clap(long, default_value="Unknown")]
+  pub spawn: String,
 
   /// Active loot prey
+  #[clap(long, default_value_t=1.0)]
   pub prey: f32,
 
-  /// Active charm
+  /// Active loot charm
+  #[clap(long, default_value_t=1.0)]
   pub charm: f32,
 
 }
