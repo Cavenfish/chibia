@@ -9,7 +9,7 @@ pub fn init_local() {
   let chibia = data_dir().unwrap().join("chibia");
   
   if !chibia.exists() {
-    fs::create_dir_all(chibia)
+    fs::create_dir_all(&chibia)
       .expect("Unable to make local dirs");
   }
 
@@ -49,7 +49,7 @@ fn init_db() -> Result<(), Error> {
   db.execute(
     "CREATE TABLE IF NOT EXISTS hunts (
       id        INTEGER PRIMARY KEY,
-      char_name TEXT,
+      char_id   INTEGER,
       balance   REAL,
       damage    REAL,
       damage_h  REAL,
@@ -61,7 +61,7 @@ fn init_db() -> Result<(), Error> {
       supplies  REAL,
       xp        REAL,
       xp_h      REAL,
-      FOREIGN KEY (char_name) REFERENCES chars (name)
+      FOREIGN KEY (char_id) REFERENCES chars (id)
     )", ()
   )?;
 

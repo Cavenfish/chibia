@@ -1,4 +1,5 @@
 use std::fs;
+use std::path::PathBuf;
 use std::ffi::OsStr;
 use crate::db::load_db;
 use crate::hunts::parse::{read_hunt_json, HuntInfo};
@@ -6,7 +7,7 @@ use crate::hunts::parse::{read_hunt_json, HuntInfo};
 use dirs::data_dir;
 use rusqlite::{Error};
 
-pub fn get_hunt_logs() -> Vec<fs::Path> {
+pub fn get_hunt_logs() -> Vec<PathBuf> {
 
   let tibia = data_dir().unwrap()
     .join("CipSoft GmbH/Tibia/packages/Tibia/log");

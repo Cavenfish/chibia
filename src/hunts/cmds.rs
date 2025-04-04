@@ -14,7 +14,7 @@ pub fn handle_hunts_cmd(cmd: HuntsCommand) {
 
   match cmd.command {
 
-    HuntsSubcommand::Add(cmd) => add_hunt(cmd),
+    HuntsSubcommand::Add(cmd) => add_hunts(cmd),
     HuntsSubcommand::Delete(cmd) => todo!(),//delete_hunt(cmd),
     HuntsSubcommand::Top(cmd) => todo!(),//top_hunt(cmd),
     HuntsSubcommand::Show(cmd) => handle_hunt_show(cmd),
@@ -32,17 +32,47 @@ pub fn add_hunts(cmd: AddHunt) {
 
     db.execute(
       "INSERT INTO hunts (
-        char_name, balance, damage, damage_h,
+        char_id, balance, damage, damage_h,
         healing, healing_h, loot, raw_xp, raw_xp_h,
         supplies, xp, xp_h
       ) values (
         ?1, ?2, ?3, ?4, ?5, ?6,
         ?7, ?8, ?9, ?10, ?11, ?12
       )", (
-        &info.name, info.balance
+        cmd.id, info.balance, info.damage, info.damage_h,
+        info.healing, info.healing_h, info.loot, info.raw_xp,
+        info.raw_xp_h, info.supplies, info.xp, info.xp_h
       )
     ).expect("Failed to insert into table");
-  }
+
+    let id: u32 = db.last_insert_rowid()
+      .try_into().expect("Failed to convert id type");
+
+    for mob in info.killed_monsters {
+
+      db.execute(
+        "INSERT INTO mob_kills (
+          hunt_id, count, name
+        ) values (?1, ?2, ?3)",
+        (id, mob.count, &mob.name)
+      ).expect("Failed to insert");
+      
+    };
+
+    for item in info.looted_items {
+
+      db.execute(
+        "INSERT INTO items_looted (
+          hunt_id, count, name
+        ) values (?1, ?2, ?3)",
+        (id, item.count, &item.name)
+      ).expect("Failed to insert");
+
+    };
+
+  };
+
+
 }
 
 pub fn handle_hunt_show(cmd: ShowArgs) {

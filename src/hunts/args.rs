@@ -28,9 +28,13 @@ pub enum HuntsSubcommand {
 #[derive(Debug, Args)]
 pub struct AddHunt {
 
-  /// Character used on hunt
-  #[clap(long, default_value="Uknown")]
-  pub name: String,
+  // Character used on hunt
+  // #[clap(short, long)]
+  // pub name: String,
+
+  /// ID of character used on hunt
+  #[clap(short, long)]
+  pub id: u32,
 
   /// Location of hunt
   #[clap(long, default_value="Unknown")]
