@@ -2,7 +2,7 @@ use crate::db::load_db;
 use crate::args::ShowArgs;
 use crate::hunts::utils::get_hunt_logs;
 use crate::hunts::parse::read_hunt_json;
-// use crate::hunts::utils::{get_all_hunts, get_hunt};
+use crate::hunts::utils::{get_all_hunts};
 use crate::hunts::args::{
   HuntsCommand, HuntsSubcommand, AddHunt,
   DeleteHunt, TopHunt, 
@@ -97,22 +97,24 @@ pub fn show_hunt(id: u32) {
 }
 
 pub fn show_hunts() {
-  // let chars = get_all_hunts().expect("Failed to query DB");
+  let hunts = get_all_hunts().expect("Failed to query DB.");
 
-  // println!(
-  //   "{: <5} {: <15} {: <10} {: <10}",
-  //   "ID", "Vocation", "Name", "Level"
-  // );
+  println!(
+    "{: <5} {: <15} {: <10} {: <10}",
+    "ID", "Char_id", "Balance", "Raw XP/h"
+  );
 
-  // println!("{:-<55}", "");
+  println!("{:-<55}", "");
 
-  // for row in chars {
 
-  //   println!(
-  //     "{: <5} {: <15} {: <10} {: <10}",
-  //     row.id, &row.vocation, &row.name, row.level
-  //   );
+  for row in hunts {
 
-  // }
+    println!(
+      "{: <5} {: <15} {: <10} {: <10}",
+      row.id, row.char_id, row.balance, row.raw_xp_h
+    );
+
+  };
+
 
 }
