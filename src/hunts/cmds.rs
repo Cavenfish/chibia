@@ -101,7 +101,7 @@ pub fn show_hunts() {
 
   println!(
     "{: <5} {: <15} {: <10} {: <10}",
-    "ID", "Char_id", "Balance", "Raw XP/h"
+    "ID", "Character", "Balance", "Raw XP/h"
   );
 
   println!("{:-<55}", "");
@@ -111,7 +111,7 @@ pub fn show_hunts() {
 
     println!(
       "{: <5} {: <15} {: <10} {: <10}",
-      row.id, row.char_id, row.balance, row.raw_xp_h
+      row.id, &row.char_name, row.balance, row.raw_xp_h
     );
 
   };

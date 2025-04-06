@@ -29,8 +29,8 @@ pub struct HuntPreview {
   // Hunt id
   pub id: u32,
 
-  // Char id
-  pub char_id: u32,
+  // Name of character used on hunt
+  pub char_name: String,
 
   // Hunt balance
   pub balance: f64,
@@ -47,7 +47,11 @@ pub fn get_all_hunts() -> Result<Vec<HuntPreview>, Error> {
   let db = load_db()?;
 
   let mut stmt = db.prepare(
-    "SELECT id, char_id, balance, raw_xp_h FROM hunts"
+    "
+      SELECT a.id, b.name, a.balance, a.raw_xp_h 
+      FROM hunts AS a 
+      JOIN chars AS b ON b.id = a.char_id
+    "
   )?; 
 
   let rows = stmt.query_map([], |row| {
@@ -55,7 +59,7 @@ pub fn get_all_hunts() -> Result<Vec<HuntPreview>, Error> {
 
       id: row.get(0)?,
 
-      char_id: row.get(1)?,
+      char_name: row.get(1)?,
 
       balance: row.get(2)?,
 
