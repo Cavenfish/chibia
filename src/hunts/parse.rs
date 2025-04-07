@@ -79,5 +79,5 @@ fn de_from_str<'de, D>(deserializer: D) ->
   let f: i64 = s.replace(",", "").parse()
     .expect("Must be valid number");
   
-    Ok(f)
+  Ok(f)
 }

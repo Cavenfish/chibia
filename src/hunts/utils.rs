@@ -2,7 +2,7 @@ use std::fs;
 use std::path::PathBuf;
 use std::ffi::OsStr;
 use crate::db::load_db;
-use crate::hunts::parse::{read_hunt_json, HuntInfo};
+use crate::hunts::parse::{read_hunt_json, HuntInfo, CountedThing};
 
 use dirs::data_dir;
 use rusqlite::{Error};
@@ -39,9 +39,40 @@ pub struct HuntPreview {
   pub raw_xp_h: f64
 }
 
-// pub fn get_hunt(id: u32) -> Result<HuntInfo, Error> {
+fn get_counted_obj(db: Connection, id: u32, table: &str) 
+  -> Result<Vec<CountedThing>, Error> {
+    
+  let query = format!(
+    "SELECT * FROM {0} WHERE id = {1}",
+    table, id
+  );
 
-// }
+  let mut stmt = db.prepare(&query)?;
+
+  let rows = stmt.query_map([], |row| {
+    Ok(CountedThing {
+
+      count: row.get(0),
+
+      name: row.get(1)
+
+    })
+  })?;
+
+  rows.collect::<Result<Vec<CountedThing>, _>>()
+}
+
+pub fn get_hunt(id: u32) -> Result<HuntInfo, Error> {
+  let db = load_db()?;
+
+  let mobs  = get_counted_obj(db, id, "mob_kills")?;
+
+  let items = get_counted_obj(db, id, "items_looted")?;
+
+  
+  
+
+}
 
 pub fn get_all_hunts() -> Result<Vec<HuntPreview>, Error> {
   let db = load_db()?;

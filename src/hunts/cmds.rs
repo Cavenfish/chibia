@@ -2,7 +2,7 @@ use crate::db::load_db;
 use crate::args::ShowArgs;
 use crate::hunts::utils::get_hunt_logs;
 use crate::hunts::parse::read_hunt_json;
-use crate::hunts::utils::{get_all_hunts};
+use crate::hunts::utils::{get_all_hunts, get_hunt};
 use crate::hunts::args::{
   HuntsCommand, HuntsSubcommand, AddHunt,
   DeleteHunt, TopHunt, 
@@ -90,10 +90,10 @@ pub fn handle_hunt_show(cmd: ShowArgs) {
 }
 
 pub fn show_hunt(id: u32) {
-  // let character = get_hunt(id)
-  //   .expect("Failed to find character in DB");
+  let hunt = get_hunt(id)
+    .expect("Failed to find hunt in DB");
 
-  // println!("{:#?}", character);
+  println!("{:#?}", hunt);
 }
 
 pub fn show_hunts() {
