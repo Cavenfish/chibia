@@ -5,7 +5,7 @@ use crate::db::load_db;
 use crate::hunts::parse::{read_hunt_json, HuntInfo, CountedThing};
 
 use dirs::data_dir;
-use rusqlite::{Error};
+use rusqlite::{Connection, Error};
 
 pub fn get_hunt_logs() -> Vec<PathBuf> {
 
@@ -39,11 +39,11 @@ pub struct HuntPreview {
   pub raw_xp_h: f64
 }
 
-fn get_counted_obj(db: Connection, id: u32, table: &str) 
+fn get_counted_obj(db: &Connection, id: u32, table: &str) 
   -> Result<Vec<CountedThing>, Error> {
     
   let query = format!(
-    "SELECT * FROM {0} WHERE id = {1}",
+    "SELECT count, name FROM {0} WHERE hunt_id = {1}",
     table, id
   );
 
@@ -52,9 +52,9 @@ fn get_counted_obj(db: Connection, id: u32, table: &str)
   let rows = stmt.query_map([], |row| {
     Ok(CountedThing {
 
-      count: row.get(0),
+      count: row.get(0)?,
 
-      name: row.get(1)
+      name: row.get(1)?
 
     })
   })?;
@@ -63,15 +63,49 @@ fn get_counted_obj(db: Connection, id: u32, table: &str)
 }
 
 pub fn get_hunt(id: u32) -> Result<HuntInfo, Error> {
-  let db = load_db()?;
+  let db    = load_db()?;
 
-  let mobs  = get_counted_obj(db, id, "mob_kills")?;
+  let mobs  = get_counted_obj(&db, id, "mob_kills")?;
 
-  let items = get_counted_obj(db, id, "items_looted")?;
+  let items = get_counted_obj(&db, id, "items_looted")?;
 
+  // Get full hunt info
+  let info: HuntInfo = db.query_row(
+    "SELECT * FROM hunts WHERE id = ?1", 
+    [id,], |row| {
+      Ok(HuntInfo {
+
+        balance: row.get(2)?,
+
+        damage: row.get(3)?,
+
+        damage_h: row.get(4)?,
+
+        healing: row.get(5)?,
+
+        healing_h: row.get(6)?,
+
+        killed_monsters: mobs,
+
+        loot: row.get(7)?,
+
+        looted_items: items,
+
+        raw_xp: row.get(8)?,
+
+        raw_xp_h: row.get(9)?,
+
+        supplies: row.get(10)?,
+
+        xp: row.get(11)?,
+
+        xp_h: row.get(12)?,
+
+      })
+    }
+  )?;
   
-  
-
+  Ok(info)
 }
 
 pub fn get_all_hunts() -> Result<Vec<HuntPreview>, Error> {
