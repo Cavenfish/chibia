@@ -83,8 +83,7 @@ pub fn handle_char_show(cmd: ShowArgs) {
 }
 
 pub fn show_char(id: u32) {
-  let character = get_char(id)
-    .expect("Failed to find character in DB");
+  let character = get_char(id).expect("Failed to find character in DB");
 
   println!("{:#?}", character);
 }
