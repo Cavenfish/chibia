@@ -15,7 +15,7 @@ pub fn handle_hunts_cmd(cmd: HuntsCommand) {
   match cmd.command {
 
     HuntsSubcommand::Add(cmd) => add_hunts(cmd),
-    HuntsSubcommand::Delete(cmd) => todo!(),//delete_hunt(cmd),
+    HuntsSubcommand::Delete(cmd) => delete_hunt(cmd),
     HuntsSubcommand::Top(cmd) => todo!(),//top_hunt(cmd),
     HuntsSubcommand::Show(cmd) => handle_hunt_show(cmd),
 
@@ -32,14 +32,14 @@ pub fn add_hunts(cmd: AddHunt) {
 
     db.execute(
       "INSERT INTO hunts (
-        char_id, balance, damage, damage_h,
+        char_id, spawn, balance, damage, damage_h,
         healing, healing_h, loot, raw_xp, raw_xp_h,
         supplies, xp, xp_h
       ) values (
         ?1, ?2, ?3, ?4, ?5, ?6,
         ?7, ?8, ?9, ?10, ?11, ?12
       )", (
-        cmd.id, info.balance, info.damage, info.damage_h,
+        cmd.id, &cmd.spawn, info.balance, info.damage, info.damage_h,
         info.healing, info.healing_h, info.loot, info.raw_xp,
         info.raw_xp_h, info.supplies, info.xp, info.xp_h
       )
@@ -75,6 +75,22 @@ pub fn add_hunts(cmd: AddHunt) {
 
 }
 
+pub fn delete_hunt(cmd: DeleteHunt) {
+  let db = load_db().expect("Failed to load DB");
+
+  db.execute(
+    "DELETE FROM mob_kills WHERE hunt_id = ?1", (cmd.id,)
+  ).expect("Failed to delete mobs");
+
+  db.execute(
+    "DELETE FROM items_looted WHERE hunt_id = ?1", (cmd.id,)
+  ).expect("Failed to delete items");
+
+  db.execute(
+    "DELETE FROM hunts WHERE id = ?1", (cmd.id,)
+  ).expect("Failed to delete hunt");
+}
+
 pub fn handle_hunt_show(cmd: ShowArgs) {
 
   match cmd.id {
@@ -90,8 +106,7 @@ pub fn handle_hunt_show(cmd: ShowArgs) {
 }
 
 pub fn show_hunt(id: u32) {
-  let hunt = get_hunt(id)
-    .expect("Failed to find hunt in DB");
+  let hunt = get_hunt(id).expect("Failed to find hunt in DB");
 
   println!("{:#?}", hunt);
 }

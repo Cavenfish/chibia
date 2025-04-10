@@ -40,13 +40,9 @@ pub struct AddHunt {
   #[clap(long, default_value="Unknown")]
   pub spawn: String,
 
-  /// Active loot prey
+  /// Loot multiplier during hunt
   #[clap(long, default_value_t=1.0)]
-  pub prey: f32,
-
-  /// Active loot charm
-  #[clap(long, default_value_t=1.0)]
-  pub charm: f32,
+  pub loot_mult: f64,
 
 }
 

@@ -50,6 +50,7 @@ fn init_db() -> Result<(), Error> {
     "CREATE TABLE IF NOT EXISTS hunts (
       id        INTEGER PRIMARY KEY,
       char_id   INTEGER,
+      spawn     TEXT,
       balance   REAL,
       damage    REAL,
       damage_h  REAL,
@@ -61,6 +62,7 @@ fn init_db() -> Result<(), Error> {
       supplies  REAL,
       xp        REAL,
       xp_h      REAL,
+      loot_mult REAL,
       FOREIGN KEY (char_id) REFERENCES chars (id)
     )", ()
   )?;
