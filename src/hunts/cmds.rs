@@ -37,7 +37,7 @@ pub fn add_hunts(cmd: AddHunt) {
         supplies, xp, xp_h
       ) values (
         ?1, ?2, ?3, ?4, ?5, ?6,
-        ?7, ?8, ?9, ?10, ?11, ?12
+        ?7, ?8, ?9, ?10, ?11, ?12, ?13
       )", (
         cmd.id, &cmd.spawn, info.balance, info.damage, info.damage_h,
         info.healing, info.healing_h, info.loot, info.raw_xp,
