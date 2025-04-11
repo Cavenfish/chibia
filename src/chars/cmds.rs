@@ -92,16 +92,16 @@ pub fn show_chars() {
   let chars = get_all_chars().expect("Failed to query DB");
 
   println!(
-    "{: <5} {: <15} {: <10} {: <10}",
+    "{: <5} {: <10} {: <15} {: >7}",
     "ID", "Vocation", "Name", "Level"
   );
 
-  println!("{:-<55}", "");
+  println!("{:-<45}", "");
 
   for row in chars {
 
     println!(
-      "{: <5} {: <15} {: <10} {: <10}",
+      "{: <5} {: <10} {: <15} {: >6}",
       row.id, &row.vocation, &row.name, row.level
     );
 
