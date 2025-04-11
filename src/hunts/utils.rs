@@ -24,19 +24,43 @@ pub fn get_hunt_logs() -> Vec<PathBuf> {
   json_files
 }
 
-pub struct HuntPreview {
+#[derive(Debug)]
+pub struct FullHunt {
 
-  // Hunt id
   pub id: u32,
 
-  // Name of character used on hunt
   pub char_name: String,
 
-  // Hunt balance
+  pub spawn: String,
+
   pub balance: f64,
 
-  // Hunt raw_xp_h
-  pub raw_xp_h: f64
+  pub damage: f64,
+
+  pub damage_h: f64,
+
+  pub healing: f64,
+
+  pub healing_h: f64,
+
+  pub killed_monsters: Vec<CountedThing>,
+
+  pub loot: f64,
+
+  pub looted_items: Vec<CountedThing>,
+
+  pub raw_xp: f64,
+
+  pub raw_xp_h: f64,
+
+  pub supplies: f64,
+
+  pub xp: f64,
+
+  pub xp_h: f64,
+
+  pub loot_mult: f64,
+
 }
 
 fn get_counted_obj(db: &Connection, id: u32, table: &str) 
@@ -62,7 +86,7 @@ fn get_counted_obj(db: &Connection, id: u32, table: &str)
   rows.collect::<Result<Vec<CountedThing>, _>>()
 }
 
-pub fn get_hunt(id: u32) -> Result<HuntInfo, Error> {
+pub fn get_hunt(id: u32) -> Result<FullHunt, Error> {
   let db    = load_db()?;
 
   let mobs  = get_counted_obj(&db, id, "mob_kills")?;
@@ -70,42 +94,70 @@ pub fn get_hunt(id: u32) -> Result<HuntInfo, Error> {
   let items = get_counted_obj(&db, id, "items_looted")?;
 
   // Get full hunt info
-  let info: HuntInfo = db.query_row(
-    "SELECT * FROM hunts WHERE id = ?1", 
+  let hunt: FullHunt = db.query_row(
+    "
+      SELECT h.*, c.name FROM
+      hunts AS h
+      JOIN chars AS c ON c.id = h.char_id
+      WHERE h.id = ?1
+    ", 
     [id,], |row| {
-      Ok(HuntInfo {
+      Ok(FullHunt {
 
-        balance: row.get(2)?,
+        id: row.get(0)?,
 
-        damage: row.get(3)?,
+        spawn: row.get(2)?,
 
-        damage_h: row.get(4)?,
+        balance: row.get(3)?,
 
-        healing: row.get(5)?,
+        damage: row.get(4)?,
 
-        healing_h: row.get(6)?,
+        damage_h: row.get(5)?,
+
+        healing: row.get(6)?,
+
+        healing_h: row.get(7)?,
 
         killed_monsters: mobs,
 
-        loot: row.get(7)?,
+        loot: row.get(8)?,
 
         looted_items: items,
 
-        raw_xp: row.get(8)?,
+        raw_xp: row.get(9)?,
 
-        raw_xp_h: row.get(9)?,
+        raw_xp_h: row.get(10)?,
 
-        supplies: row.get(10)?,
+        supplies: row.get(11)?,
 
-        xp: row.get(11)?,
+        xp: row.get(12)?,
 
-        xp_h: row.get(12)?,
+        xp_h: row.get(13)?,
+
+        loot_mult: row.get(14)?,
+
+        char_name: row.get(15)?,
 
       })
     }
   )?;
   
-  Ok(info)
+  Ok(hunt)
+}
+
+pub struct HuntPreview {
+
+  // Hunt id
+  pub id: u32,
+
+  // Name of character used on hunt
+  pub char_name: String,
+
+  // Hunt balance
+  pub balance: f64,
+
+  // Hunt raw_xp_h
+  pub raw_xp_h: f64
 }
 
 pub fn get_all_hunts() -> Result<Vec<HuntPreview>, Error> {

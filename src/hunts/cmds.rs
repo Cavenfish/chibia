@@ -34,14 +34,14 @@ pub fn add_hunts(cmd: AddHunt) {
       "INSERT INTO hunts (
         char_id, spawn, balance, damage, damage_h,
         healing, healing_h, loot, raw_xp, raw_xp_h,
-        supplies, xp, xp_h
+        supplies, xp, xp_h, loot_mult
       ) values (
-        ?1, ?2, ?3, ?4, ?5, ?6,
-        ?7, ?8, ?9, ?10, ?11, ?12, ?13
+        ?1, ?2, ?3, ?4, ?5, ?6, ?7, 
+        ?8, ?9, ?10, ?11, ?12, ?13, ?14
       )", (
         cmd.id, &cmd.spawn, info.balance, info.damage, info.damage_h,
         info.healing, info.healing_h, info.loot, info.raw_xp,
-        info.raw_xp_h, info.supplies, info.xp, info.xp_h
+        info.raw_xp_h, info.supplies, info.xp, info.xp_h, cmd.loot_mult
       )
     ).expect("Failed to insert into table");
 
