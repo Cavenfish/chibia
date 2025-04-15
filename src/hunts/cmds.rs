@@ -91,6 +91,13 @@ pub fn delete_hunt(cmd: DeleteHunt) {
   ).expect("Failed to delete hunt");
 }
 
+pub fn top_hunt(cmd: TopHunt) {
+  //todo
+  // if loot and xp order by both
+  // if one only order by it
+  // print hunts in order
+}
+
 pub fn handle_hunt_show(cmd: ShowArgs) {
 
   match cmd.id {

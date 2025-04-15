@@ -60,10 +60,16 @@ pub struct TopHunt {
   /// Character used on hunts
   pub name: String,
 
-  /// Sort by
-  pub sort: String,
+  /// Sort by loot
+  #[clap(long, action)]
+  pub loot: bool,
+
+  /// Sort by loot
+  #[clap(long, action)]
+  pub xp: bool,
 
   /// Minimum level
+  #[clap(long, default_value_t=1)]
   pub min_level: u16,
 
 }
