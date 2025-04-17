@@ -1,3 +1,4 @@
+use std::fs;
 use crate::db::load_db;
 use crate::args::ShowArgs;
 use crate::hunts::utils::get_hunt_logs;
@@ -7,8 +8,6 @@ use crate::hunts::args::{
   HuntsCommand, HuntsSubcommand, AddHunt,
   DeleteHunt, TopHunt, 
 };
-
-use dirs::data_dir;
 
 pub fn handle_hunts_cmd(cmd: HuntsCommand) {
 
@@ -70,6 +69,7 @@ pub fn add_hunts(cmd: AddHunt) {
 
     };
 
+    fs::remove_file(log).expect("Failed to delete file");
   };
 
 
@@ -92,6 +92,16 @@ pub fn delete_hunt(cmd: DeleteHunt) {
 }
 
 pub fn top_hunt(cmd: TopHunt) {
+
+  if cmd.loot && cmd.xp {
+
+  } else if cmd.loot {
+
+  } else if cmd.xp {
+
+  } else {
+    panic!("Either --loot or --xp must be passed");
+  }
   //todo
   // if loot and xp order by both
   // if one only order by it

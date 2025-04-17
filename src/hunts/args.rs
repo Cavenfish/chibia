@@ -1,6 +1,8 @@
 use crate::args::ShowArgs;
+use crate::db::load_db;
 
 use clap::{Args, Subcommand};
+use rusqlite::Error;
 
 #[derive(Debug, Args)]
 pub struct HuntsCommand {
@@ -68,8 +70,20 @@ pub struct TopHunt {
   #[clap(long, action)]
   pub xp: bool,
 
-  /// Minimum level
-  #[clap(long, default_value_t=1)]
-  pub min_level: u16,
+  // Minimum level
+  // #[clap(long, default_value_t=1)]
+  // pub min_level: u16,
 
+}
+
+impl TopHunt {
+  pub fn get_char_id(&self) -> Result<u32, Error> {
+    let db = load_db()?;
+    
+    db.query_row(
+      "SELECT id FROM chars WHERE name = ?1",
+      [&self.name],
+      |row| row.get(0),
+    )
+  }
 }
