@@ -1,5 +1,6 @@
 use crate::args::ShowArgs;
 use crate::db::load_db;
+use crate::hunts::utils::HuntPreview;
 
 use clap::{Args, Subcommand};
 use rusqlite::Error;
@@ -86,4 +87,76 @@ impl TopHunt {
       |row| row.get(0),
     )
   }
+
+  pub fn print_top_hunts(&self) -> Result<(), Error> {
+    let db = load_db()?;
+    let id = self.get_char_id()?;
+
+    let mut stmt = if self.loot && self.xp {
+
+      panic!("Both --loot and --xp cannot be passed");
+
+    } else if self.loot {
+
+      db.prepare(
+        "
+          SELECT a.id, b.name, a.balance, a.raw_xp_h
+          FROM hunts AS a 
+          JOIN chars AS b ON b.id = ?1
+          WHERE a.char_id = ?1
+          ORDER BY balance DESC
+        "
+      )?
+  
+    } else if self.xp {
+
+      db.prepare(
+        "
+          SELECT a.id, b.name, a.balance, a.raw_xp_h
+          FROM hunts AS a 
+          JOIN chars AS b ON b.id = ?1
+          WHERE a.char_id = ?1
+          ORDER BY raw_xp_h DESC
+        "
+      )?
+  
+    } else {
+      panic!("Either --loot or --xp must be passed");
+    };
+
+    let rows = stmt.query_map([id], |row| {
+      Ok(HuntPreview {
+  
+        id: row.get(0)?,
+  
+        char_name: row.get(1)?,
+  
+        balance: row.get(2)?,
+  
+        raw_xp_h: row.get(3)?,
+      })
+    })?;
+  
+    let hunts = rows.collect::<Result<Vec<HuntPreview>, _>>()?;
+  
+    println!(
+      "{: <5} {: <15} {: <10} {: <10}",
+      "ID", "Character", "Balance", "Raw XP/h"
+    );
+  
+    println!("{:-<55}", "");
+  
+  
+    for row in hunts {
+  
+      println!(
+        "{: <5} {: <15} {: <10} {: <10}",
+        row.id, &row.char_name, row.balance, row.raw_xp_h
+      );
+  
+    };
+
+    Ok(())
+  }
+
 }

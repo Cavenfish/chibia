@@ -15,7 +15,7 @@ pub fn handle_hunts_cmd(cmd: HuntsCommand) {
 
     HuntsSubcommand::Add(cmd) => add_hunts(cmd),
     HuntsSubcommand::Delete(cmd) => delete_hunt(cmd),
-    HuntsSubcommand::Top(cmd) => todo!(),//top_hunt(cmd),
+    HuntsSubcommand::Top(cmd) => top_hunt(cmd),
     HuntsSubcommand::Show(cmd) => handle_hunt_show(cmd),
 
   }
@@ -93,19 +93,8 @@ pub fn delete_hunt(cmd: DeleteHunt) {
 
 pub fn top_hunt(cmd: TopHunt) {
 
-  if cmd.loot && cmd.xp {
+  cmd.print_top_hunts().expect("fail");
 
-  } else if cmd.loot {
-
-  } else if cmd.xp {
-
-  } else {
-    panic!("Either --loot or --xp must be passed");
-  }
-  //todo
-  // if loot and xp order by both
-  // if one only order by it
-  // print hunts in order
 }
 
 pub fn handle_hunt_show(cmd: ShowArgs) {
