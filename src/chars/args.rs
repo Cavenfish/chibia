@@ -1,17 +1,16 @@
+use std::fmt;
 use crate::args::ShowArgs;
 
 use clap::{Args, Subcommand};
 
 #[derive(Debug, Args)]
 pub struct CharsCommand {
-
   #[clap(subcommand)]
   pub command: CharsSubcommand,
 }
 
 #[derive(Debug, Subcommand)]
 pub enum CharsSubcommand {
-
   /// Create a new character
   Add(CharInfo),
 
@@ -30,7 +29,6 @@ pub enum CharsSubcommand {
 
 #[derive(Debug, Args)]
 pub struct CharInfo {
-
   // rowid
   #[clap(skip)]
   pub id: u32,
@@ -74,12 +72,30 @@ pub struct CharInfo {
   /// Shielding level
   #[clap(long, default_value_t=10)]
   pub shl: u8,
+}
+
+impl fmt::Display for CharInfo {
+
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "\n\t{}:\n", &self.name)?;
+    write!(f, "\t\tLevel: {}\n", self.level)?;
+    write!(f, "\t\tVocation: {}\n", &self.vocation)?;
+    write!(f, "\t\tMagic Level: {}\n", self.ml)?;
+
+    match self.vocation.as_str() {
+      "Paladin" => write!(f, "\t\tDistance Fighting: {}\n", self.dl)?,
+      "Monk" => write!(f, "\t\tFist Fighting: {}\n", self.fl)?,
+      _ => (),
+    };
+
+    write!(f, "\t\tShielding Level: {}\n", self.shl)
+  }
 
 }
 
+
 #[derive(Debug, Args)]
 pub struct LevelUpChar {
-
   /// ID of character
   #[clap(short, long)]
   pub id: u32,
@@ -91,7 +107,6 @@ pub struct LevelUpChar {
 
 #[derive(Debug, Args)]
 pub struct SkillUpChar {
-
   /// ID of character
   #[clap(short, long)]
   pub id: u32,
@@ -103,14 +118,11 @@ pub struct SkillUpChar {
   /// Number of levels to add
   #[clap(short)]
   pub n: u8,
-
 }
 
 #[derive(Debug, Args)]
 pub struct DeleteChar {
-
   /// ID of character 
   #[clap(short, long)]
   pub id: u32,
-
 }
