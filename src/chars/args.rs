@@ -77,22 +77,20 @@ pub struct CharInfo {
 impl fmt::Display for CharInfo {
 
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    write!(f, "\n\t{}:\n", &self.name)?;
-    write!(f, "\t\tLevel: {}\n", self.level)?;
-    write!(f, "\t\tVocation: {}\n", &self.vocation)?;
-    write!(f, "\t\tMagic Level: {}\n", self.ml)?;
+    writeln!(f, "\n{} ({}):", &self.name, &self.vocation)?;
+    writeln!(f, "  Level:\t\t{}", self.level)?;
+    writeln!(f, "  Magic Level:\t\t{}", self.ml)?;
 
     match self.vocation.as_str() {
-      "Paladin" => write!(f, "\t\tDistance Fighting: {}\n", self.dl)?,
-      "Monk" => write!(f, "\t\tFist Fighting: {}\n", self.fl)?,
+      "Paladin" => writeln!(f, "  Distance Fighting:\t{}", self.dl)?,
+      "Monk" => writeln!(f, "  Fist Fighting:\t{}", self.fl)?,
       _ => (),
     };
 
-    write!(f, "\t\tShielding Level: {}\n", self.shl)
+    writeln!(f, "  Shielding Level:\t{}", self.shl)
   }
 
 }
-
 
 #[derive(Debug, Args)]
 pub struct LevelUpChar {
