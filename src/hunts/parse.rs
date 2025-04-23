@@ -8,7 +8,6 @@ use serde::{de::Error, Serialize, Deserialize, Deserializer};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HuntInfo {
-
   #[serde(rename = "Balance", deserialize_with="de_from_str")]
   pub balance: f64,
 
@@ -47,7 +46,6 @@ pub struct HuntInfo {
 
   #[serde(rename = "XP/h", deserialize_with="de_from_str")]
   pub xp_h: f64,
-
 }
 
 #[derive(Debug, Serialize, Deserialize)]

@@ -1,9 +1,10 @@
 use std::fs;
 use crate::db::load_db;
 use crate::args::ShowArgs;
-use crate::hunts::utils::get_hunt_logs;
 use crate::hunts::parse::read_hunt_json;
-use crate::hunts::utils::{get_all_hunts, get_hunt};
+use crate::hunts::utils::{
+  get_all_hunts, get_hunt, HuntPreview, get_hunt_logs
+};
 use crate::hunts::args::{
   HuntsCommand, HuntsSubcommand, AddHunt,
   DeleteHunt, TopHunt, 
@@ -92,8 +93,78 @@ pub fn delete_hunt(cmd: DeleteHunt) {
 }
 
 pub fn top_hunt(cmd: TopHunt) {
+  let db = load_db().expect("Failed to load DB");
 
-  cmd.print_top_hunts().expect("fail");
+  let id: u32 = db.query_row(
+    "SELECT id FROM chars WHERE name = ?1",
+    [&cmd.name],
+    |row| row.get(0),
+  ).expect("Failed to get char id");
+
+  let mut stmt = if cmd.loot && cmd.xp {
+
+    panic!("Both --loot and --xp cannot be passed");
+
+  } else if cmd.loot {
+
+    db.prepare(
+      "
+        SELECT a.id, b.name, a.balance, a.raw_xp_h
+        FROM hunts AS a 
+        JOIN chars AS b ON b.id = ?1
+        WHERE a.char_id = ?1
+        ORDER BY balance DESC
+      "
+    ).expect("Failed to prepare query")
+
+  } else if cmd.xp {
+
+    db.prepare(
+      "
+        SELECT a.id, b.name, a.balance, a.raw_xp_h
+        FROM hunts AS a 
+        JOIN chars AS b ON b.id = ?1
+        WHERE a.char_id = ?1
+        ORDER BY raw_xp_h DESC
+      "
+    ).expect("Failed to prepare query")
+
+  } else {
+    panic!("Either --loot or --xp must be passed");
+  };
+
+  let rows = stmt.query_map([id], |row| {
+    Ok(HuntPreview {
+
+      id: row.get(0)?,
+
+      char_name: row.get(1)?,
+
+      balance: row.get(2)?,
+
+      raw_xp_h: row.get(3)?,
+    })
+  }).expect("Failed to query DB");
+
+  let hunts = rows.collect::<Result<Vec<HuntPreview>, _>>()
+    .expect("Failed to collect hunts info");
+
+  println!(
+    "{: <5} {: <15} {: <10} {: <10}",
+    "ID", "Character", "Balance", "Raw XP/h"
+  );
+
+  println!("{:-<55}", "");
+
+
+  for row in hunts {
+
+    println!(
+      "{: <5} {: <15} {: <10} {: <10}",
+      row.id, &row.char_name, row.balance, row.raw_xp_h
+    );
+
+  };
 
 }
 
