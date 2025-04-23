@@ -185,7 +185,7 @@ pub fn handle_hunt_show(cmd: ShowArgs) {
 pub fn show_hunt(id: u32) {
   let hunt = get_hunt(id).expect("Failed to find hunt in DB");
 
-  println!("{:#?}", hunt);
+  println!("{}", hunt);
 }
 
 pub fn show_hunts() {

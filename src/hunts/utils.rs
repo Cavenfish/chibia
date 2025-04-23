@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, fmt};
 use std::path::PathBuf;
 use std::ffi::OsStr;
 use crate::db::load_db;
@@ -26,7 +26,6 @@ pub fn get_hunt_logs() -> Vec<PathBuf> {
 
 #[derive(Debug)]
 pub struct FullHunt {
-
   pub id: u32,
 
   pub char_name: String,
@@ -60,7 +59,35 @@ pub struct FullHunt {
   pub xp_h: f64,
 
   pub loot_mult: f64,
+}
 
+impl fmt::Display for FullHunt {
+
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    writeln!(f, "\nCharacter Info:")?;
+    writeln!(f, "   Name: {}", &self.char_name)?;
+    writeln!(f, "Hunt Info:")?;
+    writeln!(f, "   Spawn: {}", &self.spawn)?;
+    writeln!(f, "   Loot (mult): {} ({})", self.loot, self.loot_mult)?;
+    writeln!(f, "   Supplies: {}", self.supplies)?;
+    writeln!(f, "   Balance: {}", self.balance)?;
+    writeln!(f, "   Raw XP (/h): {} ({})", self.raw_xp, self.raw_xp_h)?;
+    writeln!(f, "   XP (/h): {} ({})", self.xp, self.xp_h)?;
+    writeln!(f, "   Damage (/h): {} ({})", self.damage, self.damage_h)?;
+    writeln!(f, "   Healing (/h): {} ({})", self.healing, self.healing_h)?;
+
+    writeln!(f, "Looted Items:")?;
+    for item in &self.looted_items {
+      writeln!(f, "   -- {} {}", item.count, &item.name)?;
+    };
+
+    writeln!(f, "Monsters Killed:")?;
+    for mob in &self.killed_monsters {
+      writeln!(f, "   -- {} {}", mob.count, &mob.name)?;
+    };
+    
+    write!(f, "")
+  }
 }
 
 fn get_counted_obj(db: &Connection, id: u32, table: &str) 
