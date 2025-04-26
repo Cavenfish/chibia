@@ -182,11 +182,9 @@ pub fn get_all_hunts() -> Result<Vec<HuntPreview>, Error> {
     let db = load_db()?;
 
     let mut stmt = db.prepare(
-        "
-        SELECT a.id, b.name, a.balance, a.raw_xp_h 
+        "SELECT a.id, b.name, a.balance, a.raw_xp_h 
         FROM hunts AS a 
-        JOIN chars AS b ON b.id = a.char_id
-        ",
+        JOIN chars AS b ON b.id = a.char_id",
     )?;
 
     let rows = stmt.query_map([], |row| {

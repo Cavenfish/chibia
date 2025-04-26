@@ -1,5 +1,6 @@
-use crate::args::ShowArgs;
 use std::fmt;
+
+use crate::args::ShowArgs;
 
 use clap::{Args, Subcommand};
 

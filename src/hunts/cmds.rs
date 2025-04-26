@@ -1,9 +1,10 @@
+use std::fs;
+
 use crate::args::ShowArgs;
 use crate::db::load_db;
 use crate::hunts::args::{AddHunt, DeleteHunt, HuntsCommand, HuntsSubcommand, TopHunt};
 use crate::hunts::parse::read_hunt_json;
 use crate::hunts::utils::{HuntPreview, get_all_hunts, get_hunt, get_hunt_logs};
-use std::fs;
 
 pub fn handle_hunts_cmd(cmd: HuntsCommand) {
     match cmd.command {
@@ -24,13 +25,13 @@ pub fn add_hunts(cmd: AddHunt) {
 
         db.execute(
             "INSERT INTO hunts (
-        char_id, spawn, balance, damage, damage_h,
-        healing, healing_h, loot, raw_xp, raw_xp_h,
-        supplies, xp, xp_h, loot_mult
-      ) values (
-        ?1, ?2, ?3, ?4, ?5, ?6, ?7, 
-        ?8, ?9, ?10, ?11, ?12, ?13, ?14
-      )",
+            char_id, spawn, balance, damage, damage_h,
+            healing, healing_h, loot, raw_xp, raw_xp_h,
+            supplies, xp, xp_h, loot_mult
+            ) values (
+            ?1, ?2, ?3, ?4, ?5, ?6, ?7, 
+            ?8, ?9, ?10, ?11, ?12, ?13, ?14
+            )",
             (
                 cmd.id,
                 &cmd.spawn,
@@ -58,8 +59,8 @@ pub fn add_hunts(cmd: AddHunt) {
         for mob in info.killed_monsters {
             db.execute(
                 "INSERT INTO mob_kills (
-          hunt_id, count, name
-        ) values (?1, ?2, ?3)",
+                hunt_id, count, name
+                ) values (?1, ?2, ?3)",
                 (id, mob.count, &mob.name),
             )
             .expect("Failed to insert");
@@ -68,8 +69,8 @@ pub fn add_hunts(cmd: AddHunt) {
         for item in info.looted_items {
             db.execute(
                 "INSERT INTO items_looted (
-          hunt_id, count, name
-        ) values (?1, ?2, ?3)",
+                hunt_id, count, name
+                ) values (?1, ?2, ?3)",
                 (id, item.count, &item.name),
             )
             .expect("Failed to insert");
@@ -105,24 +106,20 @@ pub fn top_hunt(cmd: TopHunt) {
         panic!("Both --loot and --xp cannot be passed");
     } else if cmd.loot {
         db.prepare(
-            "
-        SELECT a.id, b.name, a.balance, a.raw_xp_h
-        FROM hunts AS a 
-        JOIN chars AS b ON b.id = ?1
-        WHERE a.char_id = ?1
-        ORDER BY balance DESC
-      ",
+            "SELECT a.id, b.name, a.balance, a.raw_xp_h
+            FROM hunts AS a 
+            JOIN chars AS b ON b.id = ?1
+            WHERE a.char_id = ?1
+            ORDER BY balance DESC",
         )
         .expect("Failed to prepare query")
     } else if cmd.xp {
         db.prepare(
-            "
-        SELECT a.id, b.name, a.balance, a.raw_xp_h
-        FROM hunts AS a 
-        JOIN chars AS b ON b.id = ?1
-        WHERE a.char_id = ?1
-        ORDER BY raw_xp_h DESC
-      ",
+            "SELECT a.id, b.name, a.balance, a.raw_xp_h
+            FROM hunts AS a 
+            JOIN chars AS b ON b.id = ?1
+            WHERE a.char_id = ?1
+            ORDER BY raw_xp_h DESC",
         )
         .expect("Failed to prepare query")
     } else {

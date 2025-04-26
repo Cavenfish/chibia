@@ -20,12 +20,12 @@ pub fn add_char(cmd: CharInfo) {
 
     db.execute(
         "INSERT INTO chars (
-      name, vocation, level, magic, fist,
-      sword, axe, club, distance, shielding
-    ) values (
-      ?1, ?2, ?3, ?4, ?5,
-      ?6, ?7, ?8, ?9, ?10
-    )",
+        name, vocation, level, magic, fist,
+        sword, axe, club, distance, shielding
+        ) values (
+        ?1, ?2, ?3, ?4, ?5,
+        ?6, ?7, ?8, ?9, ?10
+        )",
         (
             &cmd.name,
             &cmd.vocation,
