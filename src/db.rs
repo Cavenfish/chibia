@@ -79,5 +79,22 @@ fn init_db() -> Result<(), Error> {
         (),
     )?;
 
+    db.execute(
+        "CREATE TABLE IF NOT EXISTS char_at_hunt (
+        hunt_id   INTEGER,
+        name      TEXT,
+        vocation  TEXT,
+        level     INTEGER,
+        magic     INTEGER,
+        fist      INTEGER,
+        sword     INTEGER,
+        axe       INTEGER,
+        club      INTEGER,
+        distance  INTEGER,
+        shielding INTEGER,
+        FOREIGN KEY (hunt_id) REFERENCES hunts (id))",
+        (),
+    )?;
+
     Ok(())
 }

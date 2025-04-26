@@ -2,6 +2,7 @@ use std::ffi::OsStr;
 use std::path::PathBuf;
 use std::{fmt, fs};
 
+use crate::chars::args::CharInfo;
 use crate::db::load_db;
 use crate::hunts::parse::CountedThing;
 
@@ -29,44 +30,27 @@ pub fn get_hunt_logs() -> Vec<PathBuf> {
 #[derive(Debug)]
 pub struct FullHunt {
     pub id: u32,
-
-    pub char_name: String,
-
+    pub char_at_hunt: CharInfo,
     pub spawn: String,
-
     pub balance: f64,
-
     pub damage: f64,
-
     pub damage_h: f64,
-
     pub healing: f64,
-
     pub healing_h: f64,
-
     pub killed_monsters: Vec<CountedThing>,
-
     pub loot: f64,
-
     pub looted_items: Vec<CountedThing>,
-
     pub raw_xp: f64,
-
     pub raw_xp_h: f64,
-
     pub supplies: f64,
-
     pub xp: f64,
-
     pub xp_h: f64,
-
     pub loot_mult: f64,
 }
 
 impl fmt::Display for FullHunt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "\nCharacter Info:")?;
-        writeln!(f, "   Name: {}", &self.char_name)?;
+        writeln!(f, "{}", self.char_at_hunt)?;
         writeln!(f, "Hunt Info:")?;
         writeln!(f, "   ID: {}", self.id)?;
         writeln!(f, "   Spawn: {}", &self.spawn)?;
@@ -108,6 +92,31 @@ fn get_counted_obj(db: &Connection, id: u32, table: &str) -> Result<Vec<CountedT
     rows.collect::<Result<Vec<CountedThing>, _>>()
 }
 
+fn get_char_at_hunt(db: &Connection, id: u32) -> Result<CharInfo, Error> {
+    let character: CharInfo = db.query_row(
+        "SELECT * FROM char_at_hunt
+        WHERE hunt_id = ?1",
+        [id],
+        |row| {
+            Ok(CharInfo {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                vocation: row.get(2)?,
+                level: row.get(3)?,
+                ml: row.get(4)?,
+                fl: row.get(5)?,
+                sl: row.get(6)?,
+                al: row.get(7)?,
+                cl: row.get(8)?,
+                dl: row.get(9)?,
+                shl: row.get(10)?,
+            })
+        },
+    )?;
+
+    Ok(character)
+}
+
 pub fn get_hunt(id: u32) -> Result<FullHunt, Error> {
     let db = load_db()?;
 
@@ -115,48 +124,32 @@ pub fn get_hunt(id: u32) -> Result<FullHunt, Error> {
 
     let items = get_counted_obj(&db, id, "items_looted")?;
 
+    let char_info = get_char_at_hunt(&db, id)?;
+
     // Get full hunt info
     let hunt: FullHunt = db.query_row(
-        "SELECT h.*, c.name FROM
-        hunts AS h
-        JOIN chars AS c ON c.id = h.char_id
-        WHERE h.id = ?1",
+        "SELECT * FROM hunts
+        WHERE id = ?1",
         [id],
         |row| {
             Ok(FullHunt {
                 id: row.get(0)?,
-
                 spawn: row.get(2)?,
-
                 balance: row.get(3)?,
-
                 damage: row.get(4)?,
-
                 damage_h: row.get(5)?,
-
                 healing: row.get(6)?,
-
                 healing_h: row.get(7)?,
-
                 killed_monsters: mobs,
-
                 loot: row.get(8)?,
-
                 looted_items: items,
-
                 raw_xp: row.get(9)?,
-
                 raw_xp_h: row.get(10)?,
-
                 supplies: row.get(11)?,
-
                 xp: row.get(12)?,
-
                 xp_h: row.get(13)?,
-
                 loot_mult: row.get(14)?,
-
-                char_name: row.get(15)?,
+                char_at_hunt: char_info,
             })
         },
     )?;
@@ -165,16 +158,9 @@ pub fn get_hunt(id: u32) -> Result<FullHunt, Error> {
 }
 
 pub struct HuntPreview {
-    // Hunt id
     pub id: u32,
-
-    // Name of character used on hunt
     pub char_name: String,
-
-    // Hunt balance
     pub balance: f64,
-
-    // Hunt raw_xp_h
     pub raw_xp_h: f64,
 }
 
@@ -190,11 +176,8 @@ pub fn get_all_hunts() -> Result<Vec<HuntPreview>, Error> {
     let rows = stmt.query_map([], |row| {
         Ok(HuntPreview {
             id: row.get(0)?,
-
             char_name: row.get(1)?,
-
             balance: row.get(2)?,
-
             raw_xp_h: row.get(3)?,
         })
     })?;

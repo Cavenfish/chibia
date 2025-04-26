@@ -28,7 +28,7 @@ pub fn add_hunts(cmd: AddHunt) {
             char_id, spawn, balance, damage, damage_h,
             healing, healing_h, loot, raw_xp, raw_xp_h,
             supplies, xp, xp_h, loot_mult
-            ) values (
+            ) VALUES (
             ?1, ?2, ?3, ?4, ?5, ?6, ?7, 
             ?8, ?9, ?10, ?11, ?12, ?13, ?14
             )",
@@ -56,11 +56,22 @@ pub fn add_hunts(cmd: AddHunt) {
             .try_into()
             .expect("Failed to convert id type");
 
+        db.execute(
+            "INSERT INTO char_at_hunt (
+            hunt_id, name, vocation, level, magic,
+            fist, sword, axe, club, distance, shielding
+            ) SELECT ?1, name, vocation, level, magic,
+            fist, sword, axe, club, distance, shielding
+            FROM chars WHERE id = ?2",
+            (id, cmd.id),
+        )
+        .expect("Failed to insert into table");
+
         for mob in info.killed_monsters {
             db.execute(
                 "INSERT INTO mob_kills (
                 hunt_id, count, name
-                ) values (?1, ?2, ?3)",
+                ) VALUES (?1, ?2, ?3)",
                 (id, mob.count, &mob.name),
             )
             .expect("Failed to insert");
@@ -70,7 +81,7 @@ pub fn add_hunts(cmd: AddHunt) {
             db.execute(
                 "INSERT INTO items_looted (
                 hunt_id, count, name
-                ) values (?1, ?2, ?3)",
+                ) VALUES (?1, ?2, ?3)",
                 (id, item.count, &item.name),
             )
             .expect("Failed to insert");
