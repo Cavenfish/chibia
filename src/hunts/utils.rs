@@ -201,7 +201,5 @@ pub fn get_all_hunts() -> Result<Vec<HuntPreview>, Error> {
         })
     })?;
 
-    let hunts = rows.collect::<Result<Vec<HuntPreview>, _>>();
-
-    hunts
+    rows.collect::<Result<Vec<HuntPreview>, _>>()
 }

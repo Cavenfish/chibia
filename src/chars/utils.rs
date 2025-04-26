@@ -68,7 +68,5 @@ pub fn get_all_chars() -> Result<Vec<CharInfo>, Error> {
         })
     })?;
 
-    let chars = tmp.collect::<Result<Vec<CharInfo>, _>>();
-
-    chars
+    tmp.collect::<Result<Vec<CharInfo>, _>>()
 }
