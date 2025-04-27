@@ -50,17 +50,30 @@ pub struct FullHunt {
 
 impl fmt::Display for FullHunt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let loot = tibia_style_floats(self.loot);
+        let supplies = tibia_style_floats(self.supplies);
+        let balance = tibia_style_floats(self.balance);
+        let raw_xp = tibia_style_floats(self.raw_xp);
+        let raw_xp_h = tibia_style_floats(self.raw_xp_h);
+        let xp = tibia_style_floats(self.xp);
+        let xp_h = tibia_style_floats(self.xp_h);
+        let healing = tibia_style_floats(self.healing);
+        let healing_h = tibia_style_floats(self.healing_h);
+        let damage = tibia_style_floats(self.damage);
+        let damage_h = tibia_style_floats(self.damage_h);
+
         writeln!(f, "{}", self.char_at_hunt)?;
         writeln!(f, "Hunt Info:")?;
-        writeln!(f, "   ID: {}", self.id)?;
-        writeln!(f, "   Spawn: {}", &self.spawn)?;
-        writeln!(f, "   Loot (mult): {} ({})", self.loot, self.loot_mult)?;
-        writeln!(f, "   Supplies: {}", self.supplies)?;
-        writeln!(f, "   Balance: {}", self.balance)?;
-        writeln!(f, "   Raw XP (/h): {} ({})", self.raw_xp, self.raw_xp_h)?;
-        writeln!(f, "   XP (/h): {} ({})", self.xp, self.xp_h)?;
-        writeln!(f, "   Damage (/h): {} ({})", self.damage, self.damage_h)?;
-        writeln!(f, "   Healing (/h): {} ({})", self.healing, self.healing_h)?;
+        writeln!(f, "   ID:\t\t\t{}", self.id)?;
+        writeln!(f, "   Spawn:\t\t{}", &self.spawn)?;
+        writeln!(f, "   Loot Multiplier:\t{}", self.loot_mult)?;
+        writeln!(f, "   Loot (mult):\t\t{}", loot)?;
+        writeln!(f, "   Supplies:\t\t{}", supplies)?;
+        writeln!(f, "   Balance:\t\t{}", balance)?;
+        writeln!(f, "   Raw XP:\t\t{} ({}/h)", raw_xp, raw_xp_h)?;
+        writeln!(f, "   XP:\t\t\t{} ({}/h)", xp, xp_h)?;
+        writeln!(f, "   Damage:\t\t{} ({}/h)", damage, damage_h)?;
+        writeln!(f, "   Healing:\t\t{} ({}/h)", healing, healing_h)?;
 
         writeln!(f, "Looted Items:")?;
         for item in &self.looted_items {
@@ -73,6 +86,16 @@ impl fmt::Display for FullHunt {
         }
 
         write!(f, "")
+    }
+}
+
+fn tibia_style_floats(x: f64) -> String {
+    if x > 1e6 {
+        format!("{:.1}kk", x / 1e6)
+    } else if x > 1e3 {
+        format!("{:.1}k", x / 1e3)
+    } else {
+        format!("{x}")
     }
 }
 
