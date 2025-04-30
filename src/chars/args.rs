@@ -1,8 +1,9 @@
 use std::fmt;
 
-use crate::args::ShowArgs;
+use crate::args::{ImpExArgs, ShowArgs};
 
 use clap::{Args, Subcommand};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Args)]
 pub struct CharsCommand {
@@ -24,11 +25,17 @@ pub enum CharsSubcommand {
     /// Delete a character
     Delete(DeleteChar),
 
+    /// Import characters
+    Import(ImpExArgs),
+
+    /// Export characters
+    Export(ImpExArgs),
+
     /// List all characters
     Show(ShowArgs),
 }
 
-#[derive(Debug, Args)]
+#[derive(Debug, Args, Serialize, Deserialize)]
 pub struct CharInfo {
     // rowid
     #[clap(skip)]
@@ -77,7 +84,7 @@ pub struct CharInfo {
 
 impl fmt::Display for CharInfo {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "\n{} ({}):", &self.name, &self.vocation)?;
+        writeln!(f, "\n{} ({}):", self.name, self.vocation)?;
         writeln!(f, "  Level:\t\t{}", self.level)?;
         writeln!(f, "  Magic Level:\t\t{}", self.ml)?;
 

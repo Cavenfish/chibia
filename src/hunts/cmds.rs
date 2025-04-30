@@ -15,7 +15,7 @@ pub fn handle_hunts_cmd(cmd: HuntsCommand) {
     }
 }
 
-pub fn add_hunts(cmd: AddHunt) {
+fn add_hunts(cmd: AddHunt) {
     let db = load_db().expect("Failed to load DB");
 
     let logs = get_hunt_logs();
@@ -91,7 +91,7 @@ pub fn add_hunts(cmd: AddHunt) {
     }
 }
 
-pub fn delete_hunt(cmd: DeleteHunt) {
+fn delete_hunt(cmd: DeleteHunt) {
     let db = load_db().expect("Failed to load DB");
 
     db.execute("DELETE FROM mob_kills WHERE hunt_id = ?1", (cmd.id,))
@@ -104,7 +104,7 @@ pub fn delete_hunt(cmd: DeleteHunt) {
         .expect("Failed to delete hunt");
 }
 
-pub fn top_hunt(cmd: TopHunt) {
+fn top_hunt(cmd: TopHunt) {
     let db = load_db().expect("Failed to load DB");
 
     let id: u32 = db
@@ -170,7 +170,7 @@ pub fn top_hunt(cmd: TopHunt) {
     }
 }
 
-pub fn handle_hunt_show(cmd: ShowArgs) {
+fn handle_hunt_show(cmd: ShowArgs) {
     match cmd.id {
         // Show all case
         0 => show_hunts(),
@@ -180,13 +180,13 @@ pub fn handle_hunt_show(cmd: ShowArgs) {
     };
 }
 
-pub fn show_hunt(id: u32) {
+fn show_hunt(id: u32) {
     let hunt = get_hunt(id).expect("Failed to find hunt in DB");
 
     println!("{}", hunt);
 }
 
-pub fn show_hunts() {
+fn show_hunts() {
     let hunts = get_all_hunts().expect("Failed to query DB.");
 
     println!(

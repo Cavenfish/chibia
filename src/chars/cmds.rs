@@ -1,9 +1,14 @@
-use crate::args::ShowArgs;
+use std::fs::File;
+use std::io::BufReader;
+
+use crate::args::{ImpExArgs, ShowArgs};
 use crate::chars::args::{
     CharInfo, CharsCommand, CharsSubcommand, DeleteChar, LevelUpChar, SkillUpChar,
 };
 use crate::chars::utils::{get_all_chars, get_char};
 use crate::db::load_db;
+
+use serde_json::from_reader;
 
 pub fn handle_chars_cmd(cmd: CharsCommand) {
     match cmd.command {
@@ -11,11 +16,17 @@ pub fn handle_chars_cmd(cmd: CharsCommand) {
         CharsSubcommand::LevelUp(cmd) => level_up_char(cmd),
         CharsSubcommand::SkillUp(cmd) => skill_up_char(cmd),
         CharsSubcommand::Delete(cmd) => delete_char(cmd),
+        CharsSubcommand::Import(cmd) => import_chars(cmd),
         CharsSubcommand::Show(cmd) => handle_char_show(cmd),
+        CharsSubcommand::Export(cmd) => {
+            let chars = get_all_chars().expect("Failed to query DB");
+
+            cmd.write_file(&chars);
+        }
     }
 }
 
-pub fn add_char(cmd: CharInfo) {
+fn add_char(cmd: CharInfo) {
     let db = load_db().expect("Failed to load DB");
 
     db.execute(
@@ -42,7 +53,7 @@ pub fn add_char(cmd: CharInfo) {
     .expect("Failed to add character to DB");
 }
 
-pub fn level_up_char(cmd: LevelUpChar) {
+fn level_up_char(cmd: LevelUpChar) {
     let db = load_db().expect("Failed to load DB");
 
     db.execute(
@@ -52,7 +63,7 @@ pub fn level_up_char(cmd: LevelUpChar) {
     .expect("Failed to update character level");
 }
 
-pub fn skill_up_char(cmd: SkillUpChar) {
+fn skill_up_char(cmd: SkillUpChar) {
     let db = load_db().expect("Failed to load DB");
 
     let tmp = format!("UPDATE chars SET {0} = {0} + ?1 WHERE id = ?2", &cmd.skill);
@@ -61,14 +72,25 @@ pub fn skill_up_char(cmd: SkillUpChar) {
         .expect("Failed to update character level");
 }
 
-pub fn delete_char(cmd: DeleteChar) {
+fn delete_char(cmd: DeleteChar) {
     let db = load_db().expect("Failed to load DB");
 
     db.execute("DELETE FROM chars WHERE id = ?1", (cmd.id,))
         .expect("Failed to delete character");
 }
 
-pub fn handle_char_show(cmd: ShowArgs) {
+fn import_chars(cmd: ImpExArgs) {
+    let f = File::open(&cmd.filename).expect("Failed");
+    let reader = BufReader::new(f);
+
+    let chars: Vec<CharInfo> = from_reader(reader).expect("Failed");
+
+    for char in chars {
+        add_char(char); // Loads db once per char, need to change this
+    }
+}
+
+fn handle_char_show(cmd: ShowArgs) {
     match cmd.id {
         // Show all case
         0 => show_chars(),
@@ -78,13 +100,13 @@ pub fn handle_char_show(cmd: ShowArgs) {
     };
 }
 
-pub fn show_char(id: u32) {
+fn show_char(id: u32) {
     let character = get_char(id).expect("Failed to find character in DB");
 
     println!("{}", character);
 }
 
-pub fn show_chars() {
+fn show_chars() {
     let chars = get_all_chars().expect("Failed to query DB");
 
     println!(
