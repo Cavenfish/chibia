@@ -3,6 +3,7 @@ use std::fmt;
 use crate::args::{ImpExArgs, ShowArgs};
 
 use clap::{Args, Subcommand};
+use rusqlite::{Connection, Error};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Args)]
@@ -95,6 +96,34 @@ impl fmt::Display for CharInfo {
         };
 
         writeln!(f, "  Shielding Level:\t{}", self.shl)
+    }
+}
+
+impl CharInfo {
+    pub fn insert(&self, db: &Connection) -> Result<(), Error> {
+        db.execute(
+            "INSERT INTO chars (
+            name, vocation, level, magic, fist,
+            sword, axe, club, distance, shielding
+            ) values (
+            ?1, ?2, ?3, ?4, ?5,
+            ?6, ?7, ?8, ?9, ?10
+            )",
+            (
+                &self.name,
+                &self.vocation,
+                self.level,
+                self.ml,
+                self.fl,
+                self.sl,
+                self.al,
+                self.cl,
+                self.dl,
+                self.shl,
+            ),
+        )?;
+
+        Ok(())
     }
 }
 

@@ -29,28 +29,7 @@ pub fn handle_chars_cmd(cmd: CharsCommand) {
 fn add_char(cmd: CharInfo) {
     let db = load_db().expect("Failed to load DB");
 
-    db.execute(
-        "INSERT INTO chars (
-        name, vocation, level, magic, fist,
-        sword, axe, club, distance, shielding
-        ) values (
-        ?1, ?2, ?3, ?4, ?5,
-        ?6, ?7, ?8, ?9, ?10
-        )",
-        (
-            &cmd.name,
-            &cmd.vocation,
-            cmd.level,
-            cmd.ml,
-            cmd.fl,
-            cmd.sl,
-            cmd.al,
-            cmd.cl,
-            cmd.dl,
-            cmd.shl,
-        ),
-    )
-    .expect("Failed to add character to DB");
+    cmd.insert(&db).expect("Failed to add character to DB");
 }
 
 fn level_up_char(cmd: LevelUpChar) {
@@ -80,13 +59,14 @@ fn delete_char(cmd: DeleteChar) {
 }
 
 fn import_chars(cmd: ImpExArgs) {
+    let db = load_db().expect("Failed to load DB");
     let f = File::open(&cmd.filename).expect("Failed");
     let reader = BufReader::new(f);
 
     let chars: Vec<CharInfo> = from_reader(reader).expect("Failed");
 
     for char in chars {
-        add_char(char); // Loads db once per char, need to change this
+        char.insert(&db).expect("Failed to add character to DB");
     }
 }
 
