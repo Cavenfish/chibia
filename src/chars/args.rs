@@ -3,7 +3,7 @@ use std::fmt;
 use crate::args::{ImpExArgs, ShowArgs};
 
 use clap::{Args, Subcommand};
-use rusqlite::{Connection, Error};
+use rusqlite::Connection;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Args)]
@@ -100,7 +100,7 @@ impl fmt::Display for CharInfo {
 }
 
 impl CharInfo {
-    pub fn insert(&self, db: &Connection) -> Result<(), Error> {
+    pub fn insert(&self, db: &Connection) {
         db.execute(
             "INSERT INTO chars (
             name, vocation, level, magic, fist,
@@ -121,9 +121,8 @@ impl CharInfo {
                 self.dl,
                 self.shl,
             ),
-        )?;
-
-        Ok(())
+        )
+        .expect("Failed to add character to DB");
     }
 }
 

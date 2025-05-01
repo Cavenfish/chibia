@@ -8,15 +8,18 @@ use crate::chars::args::{
 use crate::chars::utils::{get_all_chars, get_char};
 use crate::db::load_db;
 
+use rusqlite::Connection;
 use serde_json::from_reader;
 
 pub fn handle_chars_cmd(cmd: CharsCommand) {
+    let db = load_db().expect("Failed to load DB");
+
     match cmd.command {
-        CharsSubcommand::Add(cmd) => add_char(cmd),
-        CharsSubcommand::LevelUp(cmd) => level_up_char(cmd),
-        CharsSubcommand::SkillUp(cmd) => skill_up_char(cmd),
-        CharsSubcommand::Delete(cmd) => delete_char(cmd),
-        CharsSubcommand::Import(cmd) => import_chars(cmd),
+        CharsSubcommand::Add(cmd) => cmd.insert(&db),
+        CharsSubcommand::LevelUp(cmd) => level_up_char(cmd, &db),
+        CharsSubcommand::SkillUp(cmd) => skill_up_char(cmd, &db),
+        CharsSubcommand::Delete(cmd) => delete_char(cmd, &db),
+        CharsSubcommand::Import(cmd) => import_chars(cmd, &db),
         CharsSubcommand::Show(cmd) => handle_char_show(cmd),
         CharsSubcommand::Export(cmd) => {
             let chars = get_all_chars().expect("Failed to query DB");
@@ -26,15 +29,7 @@ pub fn handle_chars_cmd(cmd: CharsCommand) {
     }
 }
 
-fn add_char(cmd: CharInfo) {
-    let db = load_db().expect("Failed to load DB");
-
-    cmd.insert(&db).expect("Failed to add character to DB");
-}
-
-fn level_up_char(cmd: LevelUpChar) {
-    let db = load_db().expect("Failed to load DB");
-
+fn level_up_char(cmd: LevelUpChar, db: &Connection) {
     db.execute(
         "UPDATE chars SET level = level + ?1 WHERE id = ?2",
         (cmd.n, cmd.id),
@@ -42,31 +37,26 @@ fn level_up_char(cmd: LevelUpChar) {
     .expect("Failed to update character level");
 }
 
-fn skill_up_char(cmd: SkillUpChar) {
-    let db = load_db().expect("Failed to load DB");
-
+fn skill_up_char(cmd: SkillUpChar, db: &Connection) {
     let tmp = format!("UPDATE chars SET {0} = {0} + ?1 WHERE id = ?2", &cmd.skill);
 
     db.execute(&tmp, (cmd.n, cmd.id))
         .expect("Failed to update character level");
 }
 
-fn delete_char(cmd: DeleteChar) {
-    let db = load_db().expect("Failed to load DB");
-
+fn delete_char(cmd: DeleteChar, db: &Connection) {
     db.execute("DELETE FROM chars WHERE id = ?1", (cmd.id,))
         .expect("Failed to delete character");
 }
 
-fn import_chars(cmd: ImpExArgs) {
-    let db = load_db().expect("Failed to load DB");
+fn import_chars(cmd: ImpExArgs, db: &Connection) {
     let f = File::open(&cmd.filename).expect("Failed");
     let reader = BufReader::new(f);
 
     let chars: Vec<CharInfo> = from_reader(reader).expect("Failed");
 
     for char in chars {
-        char.insert(&db).expect("Failed to add character to DB");
+        char.insert(&db);
     }
 }
 
