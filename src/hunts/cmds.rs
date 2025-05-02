@@ -6,18 +6,20 @@ use crate::hunts::args::{AddHunt, DeleteHunt, HuntsCommand, HuntsSubcommand, Top
 use crate::hunts::parse::read_hunt_json;
 use crate::hunts::utils::{HuntPreview, get_all_hunts, get_hunt, get_hunt_logs};
 
+use rusqlite::Connection;
+
 pub fn handle_hunts_cmd(cmd: HuntsCommand) {
+    let db = load_db().expect("Failed to load DB");
+
     match cmd.command {
-        HuntsSubcommand::Add(cmd) => add_hunts(cmd),
-        HuntsSubcommand::Delete(cmd) => delete_hunt(cmd),
-        HuntsSubcommand::Top(cmd) => top_hunt(cmd),
+        HuntsSubcommand::Add(cmd) => add_hunts(cmd, &db),
+        HuntsSubcommand::Delete(cmd) => delete_hunt(cmd, &db),
+        HuntsSubcommand::Top(cmd) => top_hunt(cmd, &db),
         HuntsSubcommand::Show(cmd) => handle_hunt_show(cmd),
     }
 }
 
-fn add_hunts(cmd: AddHunt) {
-    let db = load_db().expect("Failed to load DB");
-
+fn add_hunts(cmd: AddHunt, db: &Connection) {
     let logs = get_hunt_logs();
 
     for log in logs {
@@ -91,9 +93,7 @@ fn add_hunts(cmd: AddHunt) {
     }
 }
 
-fn delete_hunt(cmd: DeleteHunt) {
-    let db = load_db().expect("Failed to load DB");
-
+fn delete_hunt(cmd: DeleteHunt, db: &Connection) {
     db.execute("DELETE FROM mob_kills WHERE hunt_id = ?1", (cmd.id,))
         .expect("Failed to delete mobs");
 
@@ -104,9 +104,7 @@ fn delete_hunt(cmd: DeleteHunt) {
         .expect("Failed to delete hunt");
 }
 
-fn top_hunt(cmd: TopHunt) {
-    let db = load_db().expect("Failed to load DB");
-
+fn top_hunt(cmd: TopHunt, db: &Connection) {
     let id: u32 = db
         .query_row("SELECT id FROM chars WHERE name = ?1", [&cmd.name], |row| {
             row.get(0)
