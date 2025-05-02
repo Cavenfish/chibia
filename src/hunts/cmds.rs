@@ -100,6 +100,9 @@ fn delete_hunt(cmd: DeleteHunt, db: &Connection) {
     db.execute("DELETE FROM items_looted WHERE hunt_id = ?1", (cmd.id,))
         .expect("Failed to delete items");
 
+    db.execute("DELETE FROM char_at_hunt WHERE hunt_id = ?1", (cmd.id,))
+        .expect("Failed to delete items");
+
     db.execute("DELETE FROM hunts WHERE id = ?1", (cmd.id,))
         .expect("Failed to delete hunt");
 }
