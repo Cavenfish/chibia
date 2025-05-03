@@ -187,6 +187,30 @@ pub struct HuntPreview {
     pub raw_xp_h: f64,
 }
 
+impl fmt::Display for HuntPreview {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let bal = tibia_style_floats(self.balance);
+        let xp = tibia_style_floats(self.raw_xp_h);
+
+        write!(
+            f,
+            "{: <5} {: <15} {: <10} {: <10}",
+            self.id, &self.char_name, &bal, &xp
+        )
+    }
+}
+
+impl HuntPreview {
+    pub fn print_header() {
+        println!(
+            "{: <5} {: <15} {: <10} {: <10}",
+            "ID", "Character", "Balance", "Raw XP/h"
+        );
+
+        println!("{:-<55}", "");
+    }
+}
+
 pub fn get_all_hunts() -> Result<Vec<HuntPreview>, Error> {
     let db = load_db()?;
 

@@ -156,18 +156,10 @@ fn top_hunt(cmd: TopHunt, db: &Connection) {
         .collect::<Result<Vec<HuntPreview>, _>>()
         .expect("Failed to collect hunts info");
 
-    println!(
-        "{: <5} {: <15} {: <10} {: <10}",
-        "ID", "Character", "Balance", "Raw XP/h"
-    );
-
-    println!("{:-<55}", "");
+    HuntPreview::print_header();
 
     for row in hunts {
-        println!(
-            "{: <5} {: <15} {: <10} {: <10}",
-            row.id, &row.char_name, row.balance, row.raw_xp_h
-        );
+        println!("{}", row);
     }
 }
 
@@ -190,17 +182,9 @@ fn show_hunt(id: u32) {
 fn show_hunts() {
     let hunts = get_all_hunts().expect("Failed to query DB.");
 
-    println!(
-        "{: <5} {: <15} {: <10} {: <10}",
-        "ID", "Character", "Balance", "Raw XP/h"
-    );
-
-    println!("{:-<55}", "");
+    HuntPreview::print_header();
 
     for row in hunts {
-        println!(
-            "{: <5} {: <15} {: <10} {: <10}",
-            row.id, &row.char_name, row.balance, row.raw_xp_h
-        );
+        println!("{}", row);
     }
 }
