@@ -142,11 +142,8 @@ fn top_hunt(cmd: TopHunt, db: &Connection) {
         .query_map([id], |row| {
             Ok(HuntPreview {
                 id: row.get(0)?,
-
                 char_name: row.get(1)?,
-
                 balance: row.get(2)?,
-
                 raw_xp_h: row.get(3)?,
             })
         })
