@@ -185,17 +185,19 @@ pub struct HuntPreview {
     pub char_name: String,
     pub balance: f64,
     pub raw_xp_h: f64,
+    pub xp: f64,
 }
 
 impl fmt::Display for HuntPreview {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let xp = tibia_style_floats(self.xp);
         let bal = tibia_style_floats(self.balance);
-        let xp = tibia_style_floats(self.raw_xp_h);
+        let raw_xp_h = tibia_style_floats(self.raw_xp_h);
 
         write!(
             f,
-            "{: <5} {: <15} {: <10} {: <10}",
-            self.id, &self.char_name, &bal, &xp
+            "{: <5} {: <15} {: <10} {: <10} {: <10}",
+            self.id, &self.char_name, &bal, &raw_xp_h, &xp
         )
     }
 }
@@ -203,8 +205,8 @@ impl fmt::Display for HuntPreview {
 impl HuntPreview {
     pub fn print_header() {
         println!(
-            "{: <5} {: <15} {: <10} {: <10}",
-            "ID", "Character", "Balance", "Raw XP/h"
+            "{: <5} {: <15} {: <10} {: <10} {: <10}",
+            "ID", "Character", "Balance", "Raw XP/h", "Total XP"
         );
 
         println!("{:-<55}", "");
@@ -215,7 +217,7 @@ pub fn get_all_hunts() -> Result<Vec<HuntPreview>, Error> {
     let db = load_db()?;
 
     let mut stmt = db.prepare(
-        "SELECT a.id, b.name, a.balance, a.raw_xp_h 
+        "SELECT a.id, b.name, a.balance, a.raw_xp_h, a.xp
         FROM hunts AS a 
         JOIN chars AS b ON b.id = a.char_id",
     )?;
@@ -226,6 +228,7 @@ pub fn get_all_hunts() -> Result<Vec<HuntPreview>, Error> {
             char_name: row.get(1)?,
             balance: row.get(2)?,
             raw_xp_h: row.get(3)?,
+            xp: row.get(4)?,
         })
     })?;
 

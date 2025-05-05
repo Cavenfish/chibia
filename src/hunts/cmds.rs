@@ -145,6 +145,7 @@ fn top_hunt(cmd: TopHunt, db: &Connection) {
                 char_name: row.get(1)?,
                 balance: row.get(2)?,
                 raw_xp_h: row.get(3)?,
+                xp: row.get(4)?,
             })
         })
         .expect("Failed to query DB");
