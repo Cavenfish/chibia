@@ -118,20 +118,22 @@ fn top_hunt(cmd: TopHunt, db: &Connection) {
         panic!("Both --loot and --xp cannot be passed");
     } else if cmd.loot {
         db.prepare(
-            "SELECT a.id, b.name, a.balance, a.raw_xp_h
+            "SELECT a.id, b.name, a.balance, a.raw_xp_h, a.xp
             FROM hunts AS a 
             JOIN chars AS b ON b.id = ?1
             WHERE a.char_id = ?1
-            ORDER BY balance DESC",
+            ORDER BY balance DESC
+            LIMIT 5",
         )
         .expect("Failed to prepare query")
     } else if cmd.xp {
         db.prepare(
-            "SELECT a.id, b.name, a.balance, a.raw_xp_h
+            "SELECT a.id, b.name, a.balance, a.raw_xp_h, a.xp
             FROM hunts AS a 
             JOIN chars AS b ON b.id = ?1
             WHERE a.char_id = ?1
-            ORDER BY raw_xp_h DESC",
+            ORDER BY raw_xp_h DESC
+            LIMIT 5",
         )
         .expect("Failed to prepare query")
     } else {
