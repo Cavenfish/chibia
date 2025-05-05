@@ -90,9 +90,9 @@ impl fmt::Display for FullHunt {
 }
 
 fn tibia_style_floats(x: f64) -> String {
-    if x > 1e6 {
+    if x.abs() > 1e6 {
         format!("{:.1}kk", x / 1e6)
-    } else if x > 1e3 {
+    } else if x.abs() > 1e3 {
         format!("{:.1}k", x / 1e3)
     } else {
         format!("{x}")
