@@ -19,7 +19,7 @@ pub fn input<T: FromStr>(prompt: &str) -> Result<T, <T as FromStr>::Err> {
         .read_line(&mut input)
         .expect("Input could not be read");
 
-    input.parse()
+    input.trim().parse()
 }
 
 pub fn get_hunt_logs() -> Vec<PathBuf> {
