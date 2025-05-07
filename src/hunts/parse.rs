@@ -47,6 +47,15 @@ pub struct HuntInfo {
     pub xp_h: f64,
 }
 
+impl HuntInfo {
+    pub fn print_preview(&self) {
+        println!("Preview Monsters Killed:");
+        for mob in &self.killed_monsters[1..2] {
+            println!("   -- {} {}", mob.count, &mob.name);
+        }
+    }
+}
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct CountedThing {
     #[serde(rename = "Count")]

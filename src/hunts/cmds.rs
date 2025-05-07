@@ -4,7 +4,7 @@ use crate::args::ShowArgs;
 use crate::db::load_db;
 use crate::hunts::args::{AddHunt, DeleteHunt, HuntsCommand, HuntsSubcommand, TopHunt};
 use crate::hunts::parse::read_hunt_json;
-use crate::hunts::utils::{HuntPreview, get_all_hunts, get_hunt, get_hunt_logs};
+use crate::hunts::utils::{HuntPreview, get_all_hunts, get_hunt, get_hunt_logs, input};
 
 use rusqlite::Connection;
 
@@ -25,6 +25,18 @@ fn add_hunts(cmd: AddHunt, db: &Connection) {
     for log in logs {
         let info = read_hunt_json(&log);
 
+        info.print_preview();
+
+        let spawn: String = input("Spawn name?").unwrap();
+        let mult: f64 = input("Loot multiplier?").unwrap();
+        let char_id: u32 = input("Character ID?").unwrap();
+
+        let skip: bool = input("skip?").unwrap();
+
+        if skip {
+            continue;
+        }
+
         db.execute(
             "INSERT INTO hunts (
             char_id, spawn, balance, damage, damage_h,
@@ -35,8 +47,8 @@ fn add_hunts(cmd: AddHunt, db: &Connection) {
             ?8, ?9, ?10, ?11, ?12, ?13, ?14
             )",
             (
-                cmd.id,
-                &cmd.spawn,
+                char_id,
+                &spawn,
                 info.balance,
                 info.damage,
                 info.damage_h,
@@ -48,7 +60,7 @@ fn add_hunts(cmd: AddHunt, db: &Connection) {
                 info.supplies,
                 info.xp,
                 info.xp_h,
-                cmd.loot_mult,
+                mult,
             ),
         )
         .expect("Failed to insert into table");
@@ -65,7 +77,7 @@ fn add_hunts(cmd: AddHunt, db: &Connection) {
             ) SELECT ?1, name, vocation, level, magic,
             fist, sword, axe, club, distance, shielding
             FROM chars WHERE id = ?2",
-            (id, cmd.id),
+            (id, char_id),
         )
         .expect("Failed to insert into table");
 

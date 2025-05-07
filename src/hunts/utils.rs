@@ -1,5 +1,6 @@
 use std::ffi::OsStr;
 use std::path::PathBuf;
+use std::str::FromStr;
 use std::{fmt, fs};
 
 use crate::chars::args::CharInfo;
@@ -8,6 +9,18 @@ use crate::hunts::parse::CountedThing;
 
 use dirs::data_dir;
 use rusqlite::{Connection, Error};
+
+pub fn input<T: FromStr>(prompt: &str) -> Result<T, <T as FromStr>::Err> {
+    let mut input = String::with_capacity(64);
+
+    println!("{}", prompt);
+
+    std::io::stdin()
+        .read_line(&mut input)
+        .expect("Input could not be read");
+
+    input.parse()
+}
 
 pub fn get_hunt_logs() -> Vec<PathBuf> {
     let tibia = data_dir()

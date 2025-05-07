@@ -29,7 +29,7 @@ pub struct AddHunt {
     // #[clap(short, long)]
     // pub name: String,
     /// ID of character used on hunt
-    #[clap(short, long)]
+    #[clap(long, default_value_t = 0)]
     pub id: u32,
 
     /// Location of hunt
