@@ -1,4 +1,5 @@
 use crate::args::ShowArgs;
+use crate::hunts::utils::input;
 
 use clap::{Args, Subcommand};
 
@@ -23,11 +24,8 @@ pub enum HuntsSubcommand {
     Show(ShowArgs),
 }
 
-#[derive(Debug, Args)]
+#[derive(Debug, Args, Clone)]
 pub struct AddHunt {
-    // Character used on hunt
-    // #[clap(short, long)]
-    // pub name: String,
     /// ID of character used on hunt
     #[clap(long, default_value_t = 0)]
     pub id: u32,
@@ -37,8 +35,25 @@ pub struct AddHunt {
     pub spawn: String,
 
     /// Loot multiplier during hunt
-    #[clap(long, default_value_t = 1.0)]
+    #[clap(long, default_value_t = 0.0)]
     pub loot_mult: f64,
+}
+
+impl AddHunt {
+    pub fn ask_and_update(&mut self, og: &AddHunt) {
+        if og.spawn == "Unknown" {
+            self.spawn = input("Spwan name?").unwrap();
+        };
+
+        if og.id == 0 {
+            self.id = input("Character ID?").unwrap();
+        };
+
+        if og.loot_mult == 0.0 {
+            self.loot_mult = input("Loot multiplier?").unwrap();
+        };
+        println!();
+    }
 }
 
 #[derive(Debug, Args)]

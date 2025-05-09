@@ -49,10 +49,23 @@ pub struct HuntInfo {
 
 impl HuntInfo {
     pub fn print_preview(&self) {
+        println!("Total XP Gain: {}", self.xp);
+        println!("Raw XP/h: {}", self.xp);
+        println!("Balance: {}", self.balance);
+
+        let n = self.killed_monsters.len();
+
         println!("Preview Monsters Killed:");
-        for mob in &self.killed_monsters[1..2] {
-            println!("   -- {} {}", mob.count, &mob.name);
+        if n < 5 {
+            for mob in &self.killed_monsters[0..n] {
+                println!("   -- {} {}", mob.count, &mob.name);
+            }
+        } else {
+            for mob in &self.killed_monsters[0..4] {
+                println!("   -- {} {}", mob.count, &mob.name);
+            }
         }
+        println!();
     }
 }
 

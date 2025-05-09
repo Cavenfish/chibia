@@ -1,4 +1,5 @@
 use std::ffi::OsStr;
+use std::io;
 use std::path::PathBuf;
 use std::str::FromStr;
 use std::{fmt, fs};
@@ -15,7 +16,7 @@ pub fn input<T: FromStr>(prompt: &str) -> Result<T, <T as FromStr>::Err> {
 
     println!("{}", prompt);
 
-    std::io::stdin()
+    io::stdin()
         .read_line(&mut input)
         .expect("Input could not be read");
 

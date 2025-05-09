@@ -21,15 +21,14 @@ pub fn handle_hunts_cmd(cmd: HuntsCommand) {
 
 fn add_hunts(cmd: AddHunt, db: &Connection) {
     let logs = get_hunt_logs();
+    let mut extra = cmd.clone();
 
     for log in logs {
         let info = read_hunt_json(&log);
 
         info.print_preview();
 
-        let spawn: String = input("Spawn name?").unwrap();
-        let mult: f64 = input("Loot multiplier?").unwrap();
-        let char_id: u32 = input("Character ID?").unwrap();
+        extra.ask_and_update(&cmd);
 
         let skip: bool = input("skip?").unwrap();
 
@@ -47,8 +46,8 @@ fn add_hunts(cmd: AddHunt, db: &Connection) {
             ?8, ?9, ?10, ?11, ?12, ?13, ?14
             )",
             (
-                char_id,
-                &spawn,
+                extra.id,
+                &extra.spawn,
                 info.balance,
                 info.damage,
                 info.damage_h,
@@ -60,7 +59,7 @@ fn add_hunts(cmd: AddHunt, db: &Connection) {
                 info.supplies,
                 info.xp,
                 info.xp_h,
-                mult,
+                extra.loot_mult,
             ),
         )
         .expect("Failed to insert into table");
@@ -77,7 +76,7 @@ fn add_hunts(cmd: AddHunt, db: &Connection) {
             ) SELECT ?1, name, vocation, level, magic,
             fist, sword, axe, club, distance, shielding
             FROM chars WHERE id = ?2",
-            (id, char_id),
+            (id, extra.id),
         )
         .expect("Failed to insert into table");
 
