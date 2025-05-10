@@ -5,6 +5,8 @@ use std::path::Path;
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::from_reader;
 
+use crate::style::TibiaStyle;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HuntInfo {
     #[serde(rename = "Balance", deserialize_with = "de_from_str")]
@@ -49,9 +51,9 @@ pub struct HuntInfo {
 
 impl HuntInfo {
     pub fn print_preview(&self) {
-        println!("Total XP Gain: {}", self.xp);
-        println!("Raw XP/h: {}", self.xp);
-        println!("Balance: {}", self.balance);
+        println!("Total XP Gain: {}", self.xp.tibia());
+        println!("Raw XP/h: {}", self.xp_h.tibia());
+        println!("Balance: {}", self.balance.tibia());
 
         let n = self.killed_monsters.len();
 
