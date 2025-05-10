@@ -7,6 +7,7 @@ use std::{fmt, fs};
 use crate::chars::args::CharInfo;
 use crate::db::load_db;
 use crate::hunts::parse::CountedThing;
+use crate::style::TibiaStyle;
 
 use dirs::data_dir;
 use rusqlite::{Connection, Error};
@@ -64,30 +65,38 @@ pub struct FullHunt {
 
 impl fmt::Display for FullHunt {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let loot = tibia_style_floats(self.loot);
-        let supplies = tibia_style_floats(self.supplies);
-        let balance = tibia_style_floats(self.balance);
-        let raw_xp = tibia_style_floats(self.raw_xp);
-        let raw_xp_h = tibia_style_floats(self.raw_xp_h);
-        let xp = tibia_style_floats(self.xp);
-        let xp_h = tibia_style_floats(self.xp_h);
-        let healing = tibia_style_floats(self.healing);
-        let healing_h = tibia_style_floats(self.healing_h);
-        let damage = tibia_style_floats(self.damage);
-        let damage_h = tibia_style_floats(self.damage_h);
-
         writeln!(f, "{}", self.char_at_hunt)?;
         writeln!(f, "Hunt Info:")?;
         writeln!(f, "   ID:\t\t\t{}", self.id)?;
         writeln!(f, "   Spawn:\t\t{}", &self.spawn)?;
         writeln!(f, "   Loot Multiplier:\t{}", self.loot_mult)?;
-        writeln!(f, "   Loot (mult):\t\t{}", loot)?;
-        writeln!(f, "   Supplies:\t\t{}", supplies)?;
-        writeln!(f, "   Balance:\t\t{}", balance)?;
-        writeln!(f, "   Raw XP:\t\t{} ({}/h)", raw_xp, raw_xp_h)?;
-        writeln!(f, "   XP:\t\t\t{} ({}/h)", xp, xp_h)?;
-        writeln!(f, "   Damage:\t\t{} ({}/h)", damage, damage_h)?;
-        writeln!(f, "   Healing:\t\t{} ({}/h)", healing, healing_h)?;
+        writeln!(f, "   Loot:\t\t{}", self.loot.tibia())?;
+        writeln!(f, "   Supplies:\t\t{}", self.supplies.tibia())?;
+        writeln!(f, "   Balance:\t\t{}", self.balance.tibia())?;
+        writeln!(
+            f,
+            "   Raw XP:\t\t{} ({}/h)",
+            self.raw_xp.tibia(),
+            self.raw_xp_h.tibia()
+        )?;
+        writeln!(
+            f,
+            "   XP:\t\t\t{} ({}/h)",
+            self.xp.tibia(),
+            self.xp_h.tibia()
+        )?;
+        writeln!(
+            f,
+            "   Damage:\t\t{} ({}/h)",
+            self.damage.tibia(),
+            self.damage_h.tibia()
+        )?;
+        writeln!(
+            f,
+            "   Healing:\t\t{} ({}/h)",
+            self.healing.tibia(),
+            self.healing_h.tibia()
+        )?;
 
         writeln!(f, "Looted Items:")?;
         for item in &self.looted_items {
@@ -100,16 +109,6 @@ impl fmt::Display for FullHunt {
         }
 
         write!(f, "")
-    }
-}
-
-fn tibia_style_floats(x: f64) -> String {
-    if x.abs() > 1e6 {
-        format!("{:.1}kk", x / 1e6)
-    } else if x.abs() > 1e3 {
-        format!("{:.1}k", x / 1e3)
-    } else {
-        format!("{x}")
     }
 }
 
@@ -204,14 +203,14 @@ pub struct HuntPreview {
 
 impl fmt::Display for HuntPreview {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let xp = tibia_style_floats(self.xp);
-        let bal = tibia_style_floats(self.balance);
-        let raw_xp_h = tibia_style_floats(self.raw_xp_h);
-
         write!(
             f,
             "{: <5} {: <15} {: <10} {: <10} {: <10}",
-            self.id, &self.char_name, &bal, &raw_xp_h, &xp
+            self.id,
+            &self.char_name,
+            &self.balance.tibia(),
+            self.raw_xp_h.tibia(),
+            self.xp.tibia()
         )
     }
 }

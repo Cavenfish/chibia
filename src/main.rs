@@ -2,6 +2,7 @@ mod args;
 mod chars;
 mod db;
 mod hunts;
+mod style;
 
 // Internal
 use args::{Chibia, ChibiaArgs};
