@@ -8,12 +8,15 @@ use crate::hunts::utils::{HuntPreview, get_all_hunts, get_hunt, get_hunt_logs, i
 
 use rusqlite::Connection;
 
+use super::args::UpdateHunt;
+
 pub fn handle_hunts_cmd(cmd: HuntsCommand) {
     let db = load_db().expect("Failed to load DB");
 
     match cmd.command {
         HuntsSubcommand::Add(cmd) => add_hunts(cmd, &db),
         HuntsSubcommand::Delete(cmd) => delete_hunt(cmd, &db),
+        HuntsSubcommand::Update(cmd) => update_hunt(cmd, &db),
         HuntsSubcommand::Top(cmd) => top_hunt(cmd, &db),
         HuntsSubcommand::Show(cmd) => handle_hunt_show(cmd),
     }
@@ -116,6 +119,14 @@ fn delete_hunt(cmd: DeleteHunt, db: &Connection) {
 
     db.execute("DELETE FROM hunts WHERE id = ?1", (cmd.id,))
         .expect("Failed to delete hunt");
+}
+
+fn update_hunt(cmd: UpdateHunt, db: &Connection) {
+    db.execute(
+        "UPDATE hunts SET spawn = ?1 WHERE id = ?2",
+        (&cmd.spawn, cmd.id),
+    )
+    .expect("Failed to update hunt");
 }
 
 fn top_hunt(cmd: TopHunt, db: &Connection) {

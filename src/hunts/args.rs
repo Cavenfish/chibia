@@ -17,6 +17,9 @@ pub enum HuntsSubcommand {
     /// Delete a hunt log
     Delete(DeleteHunt),
 
+    /// Update a hunt log
+    Update(UpdateHunt),
+
     /// Get top hunting spots
     Top(TopHunt),
 
@@ -60,6 +63,15 @@ impl AddHunt {
 pub struct DeleteHunt {
     /// ID of hunt log to delete
     pub id: u32,
+}
+
+#[derive(Debug, Args)]
+pub struct UpdateHunt {
+    /// ID of hunt log to update
+    pub id: u32,
+
+    /// New spawn name
+    pub spawn: String,
 }
 
 #[derive(Debug, Args)]
