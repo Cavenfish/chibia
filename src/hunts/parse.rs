@@ -52,7 +52,7 @@ pub struct HuntInfo {
 impl HuntInfo {
     pub fn print_preview(&self) {
         println!("Total XP Gain: {}", self.xp.tibia());
-        println!("Raw XP/h: {}", self.xp_h.tibia());
+        println!("Raw XP/h: {}", self.raw_xp_h.tibia());
         println!("Balance: {}", self.balance.tibia());
 
         let n = self.killed_monsters.len();
