@@ -143,7 +143,7 @@ fn top_hunt(cmd: TopHunt, db: &Connection) {
             "SELECT a.id, b.name, a.balance, a.raw_xp_h, a.xp
             FROM hunts AS a 
             JOIN chars AS b ON b.id = ?1
-            WHERE a.char_id = ?1
+            WHERE (a.char_id = ?1 AND a.spawn = ?2)
             ORDER BY balance DESC
             LIMIT 5",
         )
@@ -153,7 +153,7 @@ fn top_hunt(cmd: TopHunt, db: &Connection) {
             "SELECT a.id, b.name, a.balance, a.raw_xp_h, a.xp
             FROM hunts AS a 
             JOIN chars AS b ON b.id = ?1
-            WHERE a.char_id = ?1
+            WHERE (a.char_id = ?1 AND a.spawn = ?2)
             ORDER BY raw_xp_h DESC
             LIMIT 5",
         )
@@ -163,7 +163,7 @@ fn top_hunt(cmd: TopHunt, db: &Connection) {
     };
 
     let rows = stmt
-        .query_map([id], |row| {
+        .query_map((id, &cmd.spawn), |row| {
             Ok(HuntPreview {
                 id: row.get(0)?,
                 char_name: row.get(1)?,

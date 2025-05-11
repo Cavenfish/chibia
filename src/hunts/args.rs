@@ -68,16 +68,23 @@ pub struct DeleteHunt {
 #[derive(Debug, Args)]
 pub struct UpdateHunt {
     /// ID of hunt log to update
+    #[clap(short, long)]
     pub id: u32,
 
     /// New spawn name
+    #[clap(short, long)]
     pub spawn: String,
 }
 
 #[derive(Debug, Args)]
 pub struct TopHunt {
     /// Character used on hunts
+    #[clap(short, long)]
     pub name: String,
+
+    /// Restrict hunts to given spawn
+    #[clap(short, long)]
+    pub spawn: String,
 
     /// Sort by loot
     #[clap(long, action)]
