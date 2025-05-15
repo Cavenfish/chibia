@@ -3,6 +3,10 @@ use std::fs;
 use dirs::data_dir;
 use rusqlite::{Connection, Error};
 
+pub trait SQLite {
+    fn execute(&self, db: &Connection) -> Result<(), Error>;
+}
+
 pub fn init_local() {
     let chibia = data_dir().unwrap().join("chibia");
 

@@ -1,7 +1,9 @@
 use crate::args::ShowArgs;
+use crate::db::SQLite;
 use crate::hunts::utils::input;
 
 use clap::{Args, Subcommand};
+use rusqlite::{Connection, Error};
 
 #[derive(Debug, Args)]
 pub struct HuntsCommand {
@@ -65,6 +67,20 @@ pub struct DeleteHunt {
     pub id: u32,
 }
 
+impl SQLite for DeleteHunt {
+    fn execute(&self, db: &Connection) -> Result<(), Error> {
+        db.execute("DELETE FROM mob_kills WHERE hunt_id = ?1", (self.id,))?;
+
+        db.execute("DELETE FROM items_looted WHERE hunt_id = ?1", (self.id,))?;
+
+        db.execute("DELETE FROM char_at_hunt WHERE hunt_id = ?1", (self.id,))?;
+
+        db.execute("DELETE FROM hunts WHERE id = ?1", (self.id,))?;
+
+        Ok(())
+    }
+}
+
 #[derive(Debug, Args)]
 pub struct UpdateHunt {
     /// ID of hunt log to update
@@ -96,4 +112,10 @@ pub struct TopHunt {
     // Minimum level
     // #[clap(long, default_value_t=1)]
     // pub min_level: u16,
+}
+
+impl SQLite for TopHunt {
+    fn execute(&self, _db: &rusqlite::Connection) -> Result<(), rusqlite::Error> {
+        Ok(())
+    }
 }

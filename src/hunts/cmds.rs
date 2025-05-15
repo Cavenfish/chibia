@@ -1,8 +1,8 @@
 use std::fs;
 
 use crate::args::ShowArgs;
-use crate::db::load_db;
-use crate::hunts::args::{AddHunt, DeleteHunt, HuntsCommand, HuntsSubcommand, TopHunt};
+use crate::db::{SQLite, load_db};
+use crate::hunts::args::{AddHunt, HuntsCommand, HuntsSubcommand, TopHunt};
 use crate::hunts::parse::read_hunt_json;
 use crate::hunts::utils::{HuntPreview, get_all_hunts, get_hunt, get_hunt_logs, input};
 
@@ -15,7 +15,7 @@ pub fn handle_hunts_cmd(cmd: HuntsCommand) {
 
     match cmd.command {
         HuntsSubcommand::Add(cmd) => add_hunts(cmd, &db),
-        HuntsSubcommand::Delete(cmd) => delete_hunt(cmd, &db),
+        HuntsSubcommand::Delete(cmd) => cmd.execute(&db).expect("Failed to delete hunt from DB"),
         HuntsSubcommand::Update(cmd) => update_hunt(cmd, &db),
         HuntsSubcommand::Top(cmd) => top_hunt(cmd, &db),
         HuntsSubcommand::Show(cmd) => handle_hunt_show(cmd),
@@ -105,20 +105,6 @@ fn add_hunts(cmd: AddHunt, db: &Connection) {
 
         fs::remove_file(log).expect("Failed to delete file");
     }
-}
-
-fn delete_hunt(cmd: DeleteHunt, db: &Connection) {
-    db.execute("DELETE FROM mob_kills WHERE hunt_id = ?1", (cmd.id,))
-        .expect("Failed to delete mobs");
-
-    db.execute("DELETE FROM items_looted WHERE hunt_id = ?1", (cmd.id,))
-        .expect("Failed to delete items");
-
-    db.execute("DELETE FROM char_at_hunt WHERE hunt_id = ?1", (cmd.id,))
-        .expect("Failed to delete items");
-
-    db.execute("DELETE FROM hunts WHERE id = ?1", (cmd.id,))
-        .expect("Failed to delete hunt");
 }
 
 fn update_hunt(cmd: UpdateHunt, db: &Connection) {
