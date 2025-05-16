@@ -1,7 +1,17 @@
 use crate::chars::args::CharInfo;
 use crate::db::load_db;
 
-use rusqlite::Error;
+use rusqlite::{Connection, Error};
+
+pub fn get_char_id(name: &str, db: &Connection) -> Result<u32, Error> {
+    if name == "" {
+        return Ok(0);
+    };
+
+    db.query_row("SELECT id FROM chars WHERE name = ?1", [name], |row| {
+        row.get(0)
+    })
+}
 
 pub fn get_char(id: u32) -> Result<CharInfo, Error> {
     let db = load_db()?;

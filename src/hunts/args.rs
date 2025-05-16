@@ -95,11 +95,11 @@ pub struct UpdateHunt {
 #[derive(Debug, Args)]
 pub struct TopHunt {
     /// Character used on hunts
-    #[clap(short, long)]
+    #[clap(long, default_value = "")]
     pub name: String,
 
     /// Restrict hunts to given spawn
-    #[clap(short, long)]
+    #[clap(long, default_value = "")]
     pub spawn: String,
 
     /// Sort by loot
@@ -109,13 +109,11 @@ pub struct TopHunt {
     /// Sort by loot
     #[clap(long, action)]
     pub xp: bool,
+
+    /// Number of hunts to show
+    #[clap(long, default_value_t = 5)]
+    pub limit: u32,
     // Minimum level
     // #[clap(long, default_value_t=1)]
     // pub min_level: u16,
-}
-
-impl SQLite for TopHunt {
-    fn execute(&self, _db: &rusqlite::Connection) -> Result<(), rusqlite::Error> {
-        Ok(())
-    }
 }

@@ -1,12 +1,13 @@
 use std::fs;
 
 use crate::args::ShowArgs;
+use crate::chars::utils::get_char_id;
 use crate::db::{SQLite, load_db};
 use crate::hunts::args::{AddHunt, HuntsCommand, HuntsSubcommand, TopHunt};
 use crate::hunts::parse::read_hunt_json;
 use crate::hunts::utils::{HuntPreview, get_all_hunts, get_hunt, get_hunt_logs, input};
 
-use rusqlite::Connection;
+use rusqlite::{Connection, named_params};
 
 use super::args::UpdateHunt;
 
@@ -15,7 +16,7 @@ pub fn handle_hunts_cmd(cmd: HuntsCommand) {
 
     match cmd.command {
         HuntsSubcommand::Add(cmd) => add_hunts(cmd, &db),
-        HuntsSubcommand::Delete(cmd) => cmd.execute(&db).expect("Failed to delete hunt from DB"),
+        HuntsSubcommand::Delete(cmd) => cmd.execute(&db).unwrap(),
         HuntsSubcommand::Update(cmd) => update_hunt(cmd, &db),
         HuntsSubcommand::Top(cmd) => top_hunt(cmd, &db),
         HuntsSubcommand::Show(cmd) => handle_hunt_show(cmd),
@@ -116,48 +117,54 @@ fn update_hunt(cmd: UpdateHunt, db: &Connection) {
 }
 
 fn top_hunt(cmd: TopHunt, db: &Connection) {
-    let id: u32 = db
-        .query_row("SELECT id FROM chars WHERE name = ?1", [&cmd.name], |row| {
-            row.get(0)
-        })
-        .expect("Failed to get char id");
+    let id: u32 = get_char_id(&cmd.name, db).unwrap();
 
-    let mut stmt = if cmd.loot && cmd.xp {
-        panic!("Both --loot and --xp cannot be passed");
-    } else if cmd.loot {
-        db.prepare(
-            "SELECT a.id, b.name, a.balance, a.raw_xp_h, a.xp
-            FROM hunts AS a 
-            JOIN chars AS b ON b.id = ?1
-            WHERE (a.char_id = ?1 AND a.spawn = ?2)
-            ORDER BY balance DESC
-            LIMIT 5",
-        )
-        .expect("Failed to prepare query")
-    } else if cmd.xp {
-        db.prepare(
-            "SELECT a.id, b.name, a.balance, a.raw_xp_h, a.xp
-            FROM hunts AS a 
-            JOIN chars AS b ON b.id = ?1
-            WHERE (a.char_id = ?1 AND a.spawn = ?2)
-            ORDER BY raw_xp_h DESC
-            LIMIT 5",
-        )
-        .expect("Failed to prepare query")
-    } else {
-        panic!("Either --loot or --xp must be passed");
+    let join_line = match id {
+        0 => "JOIN chars AS b ON b.id = a.id",
+        _ => "JOIN chars AS b ON b.id = :id",
     };
 
+    let where_line = match (id, cmd.spawn.as_str()) {
+        (0, "") => "",
+        (0, _) => "WHERE a.spawn = :spawn",
+        (_, "") => "WHERE a.char_id = :id",
+        (_, _) => "WHERE (a.char_id = :id AND a.spawn = :spawn)",
+    };
+
+    let order_line = match (cmd.loot, cmd.xp) {
+        (true, false) => "ORDER BY balance DESC",
+        (false, true) => "ORDER BY raw_xp_h DESC",
+        _ => panic!("Bad inputs"),
+    };
+
+    let sql = format!(
+        "SELECT a.id, b.name, a.balance, a.raw_xp_h, a.xp
+        FROM hunts AS a 
+        {join_line}
+        {where_line}
+        {order_line}
+        LIMIT :limit"
+    );
+
+    let mut stmt = db.prepare(&sql).unwrap();
+
     let rows = stmt
-        .query_map((id, &cmd.spawn), |row| {
-            Ok(HuntPreview {
-                id: row.get(0)?,
-                char_name: row.get(1)?,
-                balance: row.get(2)?,
-                raw_xp_h: row.get(3)?,
-                xp: row.get(4)?,
-            })
-        })
+        .query_map(
+            named_params! {
+                ":id": id,
+                ":spawn": &cmd.spawn,
+                ":limit": cmd.limit
+            },
+            |row| {
+                Ok(HuntPreview {
+                    id: row.get(0)?,
+                    char_name: row.get(1)?,
+                    balance: row.get(2)?,
+                    raw_xp_h: row.get(3)?,
+                    xp: row.get(4)?,
+                })
+            },
+        )
         .expect("Failed to query DB");
 
     let hunts = rows
