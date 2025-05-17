@@ -120,7 +120,7 @@ fn top_hunt(cmd: TopHunt, db: &Connection) {
     let id: u32 = get_char_id(&cmd.name, db).unwrap();
 
     let join_line = match id {
-        0 => "JOIN chars AS b ON b.id = a.id",
+        0 => "JOIN chars AS b ON b.id = a.char_id",
         _ => "JOIN chars AS b ON b.id = :id",
     };
 
