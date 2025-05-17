@@ -146,25 +146,25 @@ fn top_hunt(cmd: TopHunt, db: &Connection) {
         LIMIT :limit"
     );
 
+    let params = match (sql.contains(":id"), sql.contains(":spawn")) {
+        (true, false) => named_params! {":id": id, ":limit": cmd.limit},
+        (false, true) => named_params! {":spawn": cmd.spawn, ":limit": cmd.limit},
+        (true, true) => named_params! {":id": id, ":spawn": cmd.spawn, ":limit": cmd.limit},
+        (false, false) => named_params! {":limit": cmd.limit},
+    };
+
     let mut stmt = db.prepare(&sql).unwrap();
 
     let rows = stmt
-        .query_map(
-            named_params! {
-                ":id": id,
-                ":spawn": &cmd.spawn,
-                ":limit": cmd.limit
-            },
-            |row| {
-                Ok(HuntPreview {
-                    id: row.get(0)?,
-                    char_name: row.get(1)?,
-                    balance: row.get(2)?,
-                    raw_xp_h: row.get(3)?,
-                    xp: row.get(4)?,
-                })
-            },
-        )
+        .query_map(params, |row| {
+            Ok(HuntPreview {
+                id: row.get(0)?,
+                char_name: row.get(1)?,
+                balance: row.get(2)?,
+                raw_xp_h: row.get(3)?,
+                xp: row.get(4)?,
+            })
+        })
         .expect("Failed to query DB");
 
     let hunts = rows
