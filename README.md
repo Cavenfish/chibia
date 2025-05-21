@@ -8,7 +8,7 @@ This is the English spelling of how Brazilian's pronounce Tibia. Since they are 
 
 ### Roadmap to First Release
 
-- [ ] Parse session times and lengths
+- [x] Parse session times and lengths
 - [ ] Improve UX for adding hunt logs
 - [ ] Add import/export for hunts
 - [ ] Finish readme documentation

@@ -3,13 +3,11 @@ use std::fs;
 use crate::args::ShowArgs;
 use crate::chars::utils::get_char_id;
 use crate::db::{SQLite, load_db};
-use crate::hunts::args::{AddHunt, HuntsCommand, HuntsSubcommand, TopHunt};
+use crate::hunts::args::{AddHunt, HuntsCommand, HuntsSubcommand, TopHunt, UpdateHunt};
 use crate::hunts::parse::read_hunt_json;
 use crate::hunts::utils::{HuntPreview, get_all_hunts, get_hunt, get_hunt_logs, input};
 
-use rusqlite::{Connection, named_params};
-
-use super::args::UpdateHunt;
+use rusqlite::{Connection, named_params, params};
 
 pub fn handle_hunts_cmd(cmd: HuntsCommand) {
     let db = load_db().expect("Failed to load DB");
@@ -44,12 +42,14 @@ fn add_hunts(cmd: AddHunt, db: &Connection) {
             "INSERT INTO hunts (
             char_id, spawn, balance, damage, damage_h,
             healing, healing_h, loot, raw_xp, raw_xp_h,
-            supplies, xp, xp_h, loot_mult
+            supplies, xp, xp_h, loot_mult, hunt_start,
+            hunt_end, hunt_length
             ) VALUES (
-            ?1, ?2, ?3, ?4, ?5, ?6, ?7, 
-            ?8, ?9, ?10, ?11, ?12, ?13, ?14
+            ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8,
+            ?9, ?10, ?11, ?12, ?13, ?14, ?15,
+            ?16, ?17
             )",
-            (
+            params![
                 extra.id,
                 &extra.spawn,
                 info.balance,
@@ -64,7 +64,10 @@ fn add_hunts(cmd: AddHunt, db: &Connection) {
                 info.xp,
                 info.xp_h,
                 extra.loot_mult,
-            ),
+                &info.hunt_start,
+                &info.hunt_end,
+                &info.hunt_length,
+            ],
         )
         .expect("Failed to insert into table");
 

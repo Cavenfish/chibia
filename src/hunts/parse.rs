@@ -2,10 +2,10 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
+use crate::style::TibiaStyle;
+
 use serde::{Deserialize, Deserializer, Serialize};
 use serde_json::from_reader;
-
-use crate::style::TibiaStyle;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HuntInfo {
@@ -47,6 +47,15 @@ pub struct HuntInfo {
 
     #[serde(rename = "XP/h", deserialize_with = "de_from_str")]
     pub xp_h: f64,
+
+    #[serde(rename = "Session start")]
+    pub hunt_start: String,
+
+    #[serde(rename = "Session end")]
+    pub hunt_end: String,
+
+    #[serde(rename = "Session length")]
+    pub hunt_length: String,
 }
 
 impl HuntInfo {
