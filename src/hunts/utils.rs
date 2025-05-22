@@ -71,9 +71,9 @@ impl fmt::Display for FullHunt {
         writeln!(f, "{}", self.char_at_hunt)?;
         writeln!(f, "Hunt Info:")?;
         writeln!(f, "   ID:\t\t\t{}", self.id)?;
-        writeln!(f, "   Start Date:\t\t\t{}", self.hunt_start)?;
-        writeln!(f, "   End Date:\t\t\t{}", self.hunt_end)?;
-        writeln!(f, "   Duration:\t\t\t{}", self.hunt_length)?;
+        writeln!(f, "   Start Date:\t\t{}", self.hunt_start)?;
+        writeln!(f, "   End Date:\t\t{}", self.hunt_end)?;
+        writeln!(f, "   Duration:\t\t{}", self.hunt_length)?;
         writeln!(f, "   Spawn:\t\t{}", &self.spawn)?;
         writeln!(f, "   Loot Multiplier:\t{}", self.loot_mult)?;
         writeln!(f, "   Loot:\t\t{}", self.loot.tibia())?;
@@ -190,10 +190,10 @@ pub fn get_hunt(id: u32) -> Result<FullHunt, Error> {
                 supplies: row.get(11)?,
                 xp: row.get(12)?,
                 xp_h: row.get(13)?,
-                hunt_start: row.get(14)?,
-                hunt_end: row.get(15)?,
-                hunt_length: row.get(16)?,
-                loot_mult: row.get(17)?,
+                loot_mult: row.get(14)?,
+                hunt_start: row.get(15)?,
+                hunt_end: row.get(16)?,
+                hunt_length: row.get(17)?,
                 char_at_hunt: char_info,
             })
         },
