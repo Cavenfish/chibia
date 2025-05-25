@@ -21,11 +21,7 @@ pub fn handle_chars_cmd(cmd: CharsCommand) {
         CharsSubcommand::Delete(cmd) => delete_char(cmd, &db),
         CharsSubcommand::Import(cmd) => import_chars(cmd, &db),
         CharsSubcommand::Show(cmd) => handle_char_show(cmd),
-        CharsSubcommand::Export(cmd) => {
-            let chars = get_all_chars().expect("Failed to query DB");
-
-            cmd.write_file(&chars);
-        }
+        CharsSubcommand::Export(cmd) => handle_char_export(cmd),
     }
 }
 
@@ -55,8 +51,8 @@ fn import_chars(cmd: ImpExArgs, db: &Connection) {
 
     let chars: Vec<CharInfo> = from_reader(reader).expect("Failed");
 
-    for char in chars {
-        char.insert(&db);
+    for ch in chars {
+        ch.insert(&db);
     }
 }
 
@@ -91,5 +87,17 @@ fn show_chars() {
             "{: <5} {: <10} {: <15} {: >6}",
             row.id, &row.vocation, &row.name, row.level
         );
+    }
+}
+
+fn handle_char_export(cmd: ImpExArgs) {
+    if cmd.id != 0 {
+        let cha = get_char(cmd.id).unwrap();
+
+        cmd.write_file(&cha);
+    } else {
+        let chars = get_all_chars().unwrap();
+
+        cmd.write_file(&chars);
     }
 }

@@ -11,6 +11,7 @@ use serde::Serialize;
 use serde_json::to_string_pretty;
 
 #[derive(Debug, Parser)]
+#[command(version, about = "A CLI for keeping track of Tibia hunting data")]
 pub struct ChibiaArgs {
     #[clap(subcommand)]
     pub command: Chibia,
@@ -27,7 +28,7 @@ pub enum Chibia {
 
 #[derive(Debug, Args)]
 pub struct ShowArgs {
-    /// ID of character to show (omit to show all)
+    /// ID of item to show (omit to show all)
     #[clap(long, default_value_t = 0)]
     pub id: u32,
 }
@@ -37,6 +38,10 @@ pub struct ImpExArgs {
     /// Filename
     #[clap(short, long)]
     pub filename: String,
+
+    /// ID of item to export (omit for import)
+    #[clap(long, default_value_t = 0)]
+    pub id: u32,
 }
 
 impl ImpExArgs {

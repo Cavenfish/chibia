@@ -5,12 +5,12 @@ use std::str::FromStr;
 use std::{fmt, fs};
 
 use crate::chars::args::CharInfo;
-use crate::db::load_db;
 use crate::hunts::parse::CountedThing;
 use crate::style::TibiaStyle;
 
 use dirs::data_dir;
 use rusqlite::{Connection, Error};
+use serde::Serialize;
 
 pub fn input<T: FromStr>(prompt: &str) -> Result<T, <T as FromStr>::Err> {
     let mut input = String::with_capacity(64);
@@ -42,7 +42,7 @@ pub fn get_hunt_logs() -> Vec<PathBuf> {
     json_files
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct FullHunt {
     pub id: u32,
     pub char_at_hunt: CharInfo,
@@ -159,9 +159,7 @@ fn get_char_at_hunt(db: &Connection, id: u32) -> Result<CharInfo, Error> {
     Ok(character)
 }
 
-pub fn get_hunt(id: u32) -> Result<FullHunt, Error> {
-    let db = load_db()?;
-
+pub fn get_hunt(db: &Connection, id: u32) -> Result<FullHunt, Error> {
     let mobs = get_counted_obj(&db, id, "mob_kills")?;
 
     let items = get_counted_obj(&db, id, "items_looted")?;
@@ -235,9 +233,7 @@ impl HuntPreview {
     }
 }
 
-pub fn get_all_hunts() -> Result<Vec<HuntPreview>, Error> {
-    let db = load_db()?;
-
+pub fn get_all_hunts(db: &Connection) -> Result<Vec<HuntPreview>, Error> {
     let mut stmt = db.prepare(
         "SELECT a.id, b.name, a.balance, a.raw_xp_h, a.xp
         FROM hunts AS a 

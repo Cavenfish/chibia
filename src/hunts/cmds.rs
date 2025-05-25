@@ -1,6 +1,6 @@
 use std::fs;
 
-use crate::args::ShowArgs;
+use crate::args::{ImpExArgs, ShowArgs};
 use crate::chars::utils::get_char_id;
 use crate::db::{SQLite, load_db};
 use crate::hunts::args::{AddHunt, HuntsCommand, HuntsSubcommand, TopHunt, UpdateHunt};
@@ -8,6 +8,8 @@ use crate::hunts::parse::read_hunt_json;
 use crate::hunts::utils::{HuntPreview, get_all_hunts, get_hunt, get_hunt_logs, input};
 
 use rusqlite::{Connection, named_params, params};
+
+use super::utils::FullHunt;
 
 pub fn handle_hunts_cmd(cmd: HuntsCommand) {
     let db = load_db().expect("Failed to load DB");
@@ -17,7 +19,8 @@ pub fn handle_hunts_cmd(cmd: HuntsCommand) {
         HuntsSubcommand::Delete(cmd) => cmd.execute(&db).unwrap(),
         HuntsSubcommand::Update(cmd) => update_hunt(cmd, &db),
         HuntsSubcommand::Top(cmd) => top_hunt(cmd, &db),
-        HuntsSubcommand::Show(cmd) => handle_hunt_show(cmd),
+        HuntsSubcommand::Show(cmd) => handle_hunt_show(&db, cmd),
+        HuntsSubcommand::Export(cmd) => handle_hunt_export(&db, cmd),
     }
 }
 
@@ -181,28 +184,42 @@ fn top_hunt(cmd: TopHunt, db: &Connection) {
     }
 }
 
-fn handle_hunt_show(cmd: ShowArgs) {
+fn handle_hunt_show(db: &Connection, cmd: ShowArgs) {
     match cmd.id {
         // Show all case
-        0 => show_hunts(),
+        0 => {
+            let hunts = get_all_hunts(db).unwrap();
+
+            HuntPreview::print_header();
+
+            for row in hunts {
+                println!("{}", row);
+            }
+        }
 
         // Show specific char
-        _ => show_hunt(cmd.id),
+        _ => {
+            let hunt = get_hunt(db, cmd.id).unwrap();
+
+            println!("{}", hunt);
+        }
     };
 }
 
-fn show_hunt(id: u32) {
-    let hunt = get_hunt(id).expect("Failed to find hunt in DB");
+fn handle_hunt_export(db: &Connection, cmd: ImpExArgs) {
+    if cmd.id != 0 {
+        let hunt = get_hunt(db, cmd.id).unwrap();
 
-    println!("{}", hunt);
-}
+        cmd.write_file(&hunt);
+    } else {
+        let max_id: u32 = db
+            .query_row("SELECT MAX(id) FROM hunts", [], |row| row.get(0))
+            .unwrap();
 
-fn show_hunts() {
-    let hunts = get_all_hunts().expect("Failed to query DB.");
+        let hunts: Vec<FullHunt> = (1..max_id + 1)
+            .map(|id| get_hunt(db, id).unwrap())
+            .collect();
 
-    HuntPreview::print_header();
-
-    for row in hunts {
-        println!("{}", row);
+        cmd.write_file(&hunts);
     }
 }

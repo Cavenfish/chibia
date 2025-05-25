@@ -10,7 +10,7 @@ This is the English spelling of how Brazilian's pronounce Tibia. Since they are 
 
 - [x] Parse session times and lengths
 - [ ] Improve UX for adding hunt logs
-- [ ] Add import/export for hunts
+- [x] Add import/export for hunts
 - [ ] Finish readme documentation
 - [ ] Add more information to --helps
 - [ ] Add mob_kill/h and looted_item/h stats for hunts

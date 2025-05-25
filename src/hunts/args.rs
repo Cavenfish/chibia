@@ -1,4 +1,4 @@
-use crate::args::ShowArgs;
+use crate::args::{ImpExArgs, ShowArgs};
 use crate::db::SQLite;
 use crate::hunts::utils::input;
 
@@ -27,6 +27,9 @@ pub enum HuntsSubcommand {
 
     /// List all hunt logs
     Show(ShowArgs),
+
+    /// Export hunt log
+    Export(ImpExArgs),
 }
 
 #[derive(Debug, Args, Clone)]
