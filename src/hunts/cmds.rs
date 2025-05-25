@@ -1,13 +1,18 @@
 use std::fs;
+use std::fs::File;
+use std::io::BufReader;
 
 use crate::args::{ImpExArgs, ShowArgs};
 use crate::chars::utils::get_char_id;
 use crate::db::{SQLite, load_db};
 use crate::hunts::args::{AddHunt, HuntsCommand, HuntsSubcommand, TopHunt, UpdateHunt};
 use crate::hunts::parse::read_hunt_json;
-use crate::hunts::utils::{HuntPreview, get_all_hunts, get_hunt, get_hunt_logs, input};
+use crate::hunts::utils::{
+    HuntChar, HuntPreview, get_all_hunts, get_hunt, get_hunt_logs, input, insert_hunt,
+};
 
 use rusqlite::{Connection, named_params, params};
+use serde_json::from_reader;
 
 use super::utils::FullHunt;
 
@@ -21,6 +26,7 @@ pub fn handle_hunts_cmd(cmd: HuntsCommand) {
         HuntsSubcommand::Top(cmd) => top_hunt(cmd, &db),
         HuntsSubcommand::Show(cmd) => handle_hunt_show(&db, cmd),
         HuntsSubcommand::Export(cmd) => handle_hunt_export(&db, cmd),
+        HuntsSubcommand::Import(cmd) => handle_hunt_import(&db, cmd),
     }
 }
 
@@ -35,80 +41,41 @@ fn add_hunts(cmd: AddHunt, db: &Connection) {
 
         extra.ask_and_update(&cmd);
 
-        let skip: bool = input("skip?").unwrap();
+        let skip: String = input("skip?").unwrap();
 
-        if skip {
-            continue;
+        match skip.as_str() {
+            "y" | "Y" | "yes" | "Yes" | "YES" => continue,
+            "true" | "True" | "TRUE" => continue,
+            _ => (),
         }
 
-        db.execute(
-            "INSERT INTO hunts (
-            char_id, spawn, balance, damage, damage_h,
-            healing, healing_h, loot, raw_xp, raw_xp_h,
-            supplies, xp, xp_h, loot_mult, hunt_start,
-            hunt_end, hunt_length
-            ) VALUES (
-            ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8,
-            ?9, ?10, ?11, ?12, ?13, ?14, ?15,
-            ?16, ?17
-            )",
-            params![
-                extra.id,
-                &extra.spawn,
-                info.balance,
-                info.damage,
-                info.damage_h,
-                info.healing,
-                info.healing_h,
-                info.loot,
-                info.raw_xp,
-                info.raw_xp_h,
-                info.supplies,
-                info.xp,
-                info.xp_h,
-                extra.loot_mult,
-                &info.hunt_start,
-                &info.hunt_end,
-                &info.hunt_length,
-            ],
+        let hunt_params = params![
+            &extra.spawn,
+            info.balance,
+            info.damage,
+            info.damage_h,
+            info.healing,
+            info.healing_h,
+            info.loot,
+            info.raw_xp,
+            info.raw_xp_h,
+            info.supplies,
+            info.xp,
+            info.xp_h,
+            extra.loot_mult,
+            &info.hunt_start,
+            &info.hunt_end,
+            &info.hunt_length,
+        ];
+
+        insert_hunt(
+            &db,
+            hunt_params,
+            HuntChar::ID(extra.id),
+            &info.killed_monsters,
+            &info.looted_items,
         )
-        .expect("Failed to insert into table");
-
-        let id: u32 = db
-            .last_insert_rowid()
-            .try_into()
-            .expect("Failed to convert id type");
-
-        db.execute(
-            "INSERT INTO char_at_hunt (
-            hunt_id, name, vocation, level, magic,
-            fist, sword, axe, club, distance, shielding
-            ) SELECT ?1, name, vocation, level, magic,
-            fist, sword, axe, club, distance, shielding
-            FROM chars WHERE id = ?2",
-            (id, extra.id),
-        )
-        .expect("Failed to insert into table");
-
-        for mob in info.killed_monsters {
-            db.execute(
-                "INSERT INTO mob_kills (
-                hunt_id, count, name
-                ) VALUES (?1, ?2, ?3)",
-                (id, mob.count, &mob.name),
-            )
-            .expect("Failed to insert");
-        }
-
-        for item in info.looted_items {
-            db.execute(
-                "INSERT INTO items_looted (
-                hunt_id, count, name
-                ) VALUES (?1, ?2, ?3)",
-                (id, item.count, &item.name),
-            )
-            .expect("Failed to insert");
-        }
+        .unwrap();
 
         fs::remove_file(log).expect("Failed to delete file");
     }
@@ -221,5 +188,42 @@ fn handle_hunt_export(db: &Connection, cmd: ImpExArgs) {
             .collect();
 
         cmd.write_file(&hunts);
+    }
+}
+
+fn handle_hunt_import(db: &Connection, cmd: ImpExArgs) {
+    let f = File::open(&cmd.filename).unwrap();
+    let reader = BufReader::new(f);
+
+    let hunts: Vec<FullHunt> = from_reader(reader).unwrap();
+
+    for hunt in hunts {
+        let hunt_params = params![
+            &hunt.spawn,
+            hunt.balance,
+            hunt.damage,
+            hunt.damage_h,
+            hunt.healing,
+            hunt.healing_h,
+            hunt.loot,
+            hunt.raw_xp,
+            hunt.raw_xp_h,
+            hunt.supplies,
+            hunt.xp,
+            hunt.xp_h,
+            hunt.loot_mult,
+            &hunt.hunt_start,
+            &hunt.hunt_end,
+            &hunt.hunt_length,
+        ];
+
+        insert_hunt(
+            db,
+            hunt_params,
+            HuntChar::Struct(hunt.char_at_hunt),
+            &hunt.killed_monsters,
+            &hunt.looted_items,
+        )
+        .unwrap();
     }
 }

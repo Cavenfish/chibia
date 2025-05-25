@@ -9,8 +9,8 @@ use crate::hunts::parse::CountedThing;
 use crate::style::TibiaStyle;
 
 use dirs::data_dir;
-use rusqlite::{Connection, Error};
-use serde::Serialize;
+use rusqlite::{Connection, Error, Params};
+use serde::{Deserialize, Serialize};
 
 pub fn input<T: FromStr>(prompt: &str) -> Result<T, <T as FromStr>::Err> {
     let mut input = String::with_capacity(64);
@@ -42,7 +42,7 @@ pub fn get_hunt_logs() -> Vec<PathBuf> {
     json_files
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct FullHunt {
     pub id: u32,
     pub char_at_hunt: CharInfo,
@@ -174,24 +174,24 @@ pub fn get_hunt(db: &Connection, id: u32) -> Result<FullHunt, Error> {
         |row| {
             Ok(FullHunt {
                 id: row.get(0)?,
-                spawn: row.get(2)?,
-                balance: row.get(3)?,
-                damage: row.get(4)?,
-                damage_h: row.get(5)?,
-                healing: row.get(6)?,
-                healing_h: row.get(7)?,
+                spawn: row.get(1)?,
+                balance: row.get(2)?,
+                damage: row.get(3)?,
+                damage_h: row.get(4)?,
+                healing: row.get(5)?,
+                healing_h: row.get(6)?,
                 killed_monsters: mobs,
-                loot: row.get(8)?,
+                loot: row.get(7)?,
                 looted_items: items,
-                raw_xp: row.get(9)?,
-                raw_xp_h: row.get(10)?,
-                supplies: row.get(11)?,
-                xp: row.get(12)?,
-                xp_h: row.get(13)?,
-                loot_mult: row.get(14)?,
-                hunt_start: row.get(15)?,
-                hunt_end: row.get(16)?,
-                hunt_length: row.get(17)?,
+                raw_xp: row.get(8)?,
+                raw_xp_h: row.get(9)?,
+                supplies: row.get(10)?,
+                xp: row.get(11)?,
+                xp_h: row.get(12)?,
+                loot_mult: row.get(13)?,
+                hunt_start: row.get(14)?,
+                hunt_end: row.get(15)?,
+                hunt_length: row.get(16)?,
                 char_at_hunt: char_info,
             })
         },
@@ -237,7 +237,7 @@ pub fn get_all_hunts(db: &Connection) -> Result<Vec<HuntPreview>, Error> {
     let mut stmt = db.prepare(
         "SELECT a.id, b.name, a.balance, a.raw_xp_h, a.xp
         FROM hunts AS a 
-        JOIN chars AS b ON b.id = a.char_id",
+        JOIN char_at_hunt AS b ON b.hunt_id = a.id",
     )?;
 
     let rows = stmt.query_map([], |row| {
@@ -251,4 +251,90 @@ pub fn get_all_hunts(db: &Connection) -> Result<Vec<HuntPreview>, Error> {
     })?;
 
     rows.collect::<Result<Vec<HuntPreview>, _>>()
+}
+
+pub enum HuntChar {
+    ID(u32),
+    Struct(CharInfo),
+}
+
+pub fn insert_hunt<T: Params>(
+    db: &Connection,
+    hunt_params: T,
+    hunt_char: HuntChar,
+    mobs: &Vec<CountedThing>,
+    items: &Vec<CountedThing>,
+) -> Result<(), Error> {
+    // Add data into hunts table
+    db.execute(
+        "INSERT INTO hunts (
+        spawn, balance, damage, damage_h,
+        healing, healing_h, loot, raw_xp, raw_xp_h,
+        supplies, xp, xp_h, loot_mult, hunt_start,
+        hunt_end, hunt_length
+        ) VALUES (
+        ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8,
+        ?9, ?10, ?11, ?12, ?13, ?14, ?15,
+        ?16
+        )",
+        hunt_params,
+    )?;
+
+    let id: u32 = db.last_insert_rowid().try_into().unwrap();
+
+    // Add data to char_at_hunt
+    match hunt_char {
+        HuntChar::ID(char_id) => db.execute(
+            "INSERT INTO char_at_hunt (
+            hunt_id, name, vocation, level, magic,
+            fist, sword, axe, club, distance, shielding
+            ) SELECT ?1, name, vocation, level, magic,
+            fist, sword, axe, club, distance, shielding
+            FROM chars WHERE id = ?2",
+            (id, char_id),
+        )?,
+
+        HuntChar::Struct(char_info) => db.execute(
+            "INSERT INTO char_at_hunt (
+            hunt_id, name, vocation, level, magic,
+            fist, sword, axe, club, distance, shielding
+            ) SELECT ?1, ?2, ?3, ?4, ?5, ?6, ?7, 
+            ?8, ?9, ?10, ?11",
+            (
+                char_info.id,
+                char_info.name,
+                char_info.vocation,
+                char_info.level,
+                char_info.ml,
+                char_info.fl,
+                char_info.sl,
+                char_info.al,
+                char_info.cl,
+                char_info.dl,
+                char_info.shl,
+            ),
+        )?,
+    };
+
+    // Add data into mob_kills table
+    for mob in mobs {
+        db.execute(
+            "INSERT INTO mob_kills (
+            hunt_id, count, name
+            ) VALUES (?1, ?2, ?3)",
+            (id, mob.count, &mob.name),
+        )?;
+    }
+
+    // Add data into items_looted table
+    for item in items {
+        db.execute(
+            "INSERT INTO items_looted (
+            hunt_id, count, name
+            ) VALUES (?1, ?2, ?3)",
+            (id, item.count, &item.name),
+        )?;
+    }
+
+    Ok(())
 }

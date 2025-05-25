@@ -47,7 +47,6 @@ fn init_db() -> Result<(), Error> {
     db.execute(
         "CREATE TABLE IF NOT EXISTS hunts (
         id          INTEGER PRIMARY KEY,
-        char_id     INTEGER,
         spawn       TEXT,
         balance     REAL,
         damage      REAL,
@@ -63,8 +62,7 @@ fn init_db() -> Result<(), Error> {
         loot_mult   REAL,
         hunt_start  TEXT,
         hunt_end    TEXT,
-        hunt_length TEXT,
-        FOREIGN KEY (char_id) REFERENCES chars (id))",
+        hunt_length TEXT)",
         (),
     )?;
 

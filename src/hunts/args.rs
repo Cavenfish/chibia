@@ -30,6 +30,9 @@ pub enum HuntsSubcommand {
 
     /// Export hunt log
     Export(ImpExArgs),
+
+    /// Import hunt log
+    Import(ImpExArgs),
 }
 
 #[derive(Debug, Args, Clone)]
