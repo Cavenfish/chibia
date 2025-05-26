@@ -41,12 +41,14 @@ fn add_hunts(cmd: AddHunt, db: &Connection) {
 
         extra.ask_and_update(&cmd);
 
-        let skip: String = input("skip?").unwrap();
+        if !cmd.no_skip {
+            let skip: String = input("skip?").unwrap();
 
-        match skip.as_str() {
-            "y" | "Y" | "yes" | "Yes" | "YES" => continue,
-            "true" | "True" | "TRUE" => continue,
-            _ => (),
+            match skip.as_str() {
+                "y" | "Y" | "yes" | "Yes" | "YES" => continue,
+                "true" | "True" | "TRUE" => continue,
+                _ => (),
+            }
         }
 
         let hunt_params = params![

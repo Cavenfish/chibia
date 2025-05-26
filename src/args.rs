@@ -11,7 +11,7 @@ use serde::Serialize;
 use serde_json::to_string_pretty;
 
 #[derive(Debug, Parser)]
-#[command(version, about = "A CLI for keeping track of Tibia hunting data")]
+#[command(version, about, author)]
 pub struct ChibiaArgs {
     #[clap(subcommand)]
     pub command: Chibia,

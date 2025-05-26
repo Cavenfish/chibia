@@ -48,6 +48,10 @@ pub struct AddHunt {
     /// Loot multiplier during hunt
     #[clap(long, default_value_t = 0.0)]
     pub loot_mult: f64,
+
+    /// Disable the skip prompt
+    #[clap(long, action)]
+    pub no_skip: bool,
 }
 
 impl AddHunt {
