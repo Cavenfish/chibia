@@ -83,6 +83,17 @@ ID    Character       Balance    Raw XP/h   Total XP
 17    Cavenfish       34.5k      357.3k     434.2k 
 ```
 
+You can also restrict to a specific spawn location.
+
+```bash
+chibia hunts top --name "Homem Um Soco" --spawn "Upper Spike -3" --xp
+ID    Character       Balance    Raw XP/h   Total XP  
+-------------------------------------------------------
+10    Homem Um Soco   10.7k      60.9k      21.8k     
+20    Homem Um Soco   12.6k      55.0k      25.5k     
+18    Homem Um Soco   5.5k       52.4k      29.2k 
+```
+
 ### Help Pages
 
 ```bash
