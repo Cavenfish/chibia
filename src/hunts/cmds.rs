@@ -3,7 +3,6 @@ use std::fs::File;
 use std::io::BufReader;
 
 use crate::args::{ImpExArgs, ShowArgs};
-use crate::chars::utils::get_char_id;
 use crate::db::{SQLite, load_db};
 use crate::hunts::args::{AddHunt, HuntsCommand, HuntsSubcommand, TopHunt, UpdateHunt};
 use crate::hunts::parse::read_hunt_json;
@@ -92,18 +91,11 @@ fn update_hunt(cmd: UpdateHunt, db: &Connection) {
 }
 
 fn top_hunt(cmd: TopHunt, db: &Connection) {
-    let id: u32 = get_char_id(&cmd.name, db).unwrap();
-
-    let join_line = match id {
-        0 => "JOIN chars AS b ON b.id = a.char_id",
-        _ => "JOIN chars AS b ON b.id = :id",
-    };
-
-    let where_line = match (id, cmd.spawn.as_str()) {
-        (0, "") => "",
-        (0, _) => "WHERE a.spawn = :spawn",
-        (_, "") => "WHERE a.char_id = :id",
-        (_, _) => "WHERE (a.char_id = :id AND a.spawn = :spawn)",
+    let where_line = match (cmd.name.as_str(), cmd.spawn.as_str()) {
+        ("", "") => "",
+        ("", _) => "WHERE a.spawn = :spawn",
+        (_, "") => "WHERE b.name = :name",
+        (_, _) => "WHERE (b.name = :name AND a.spawn = :spawn)",
     };
 
     let order_line = match (cmd.loot, cmd.xp) {
@@ -115,16 +107,16 @@ fn top_hunt(cmd: TopHunt, db: &Connection) {
     let sql = format!(
         "SELECT a.id, b.name, a.balance, a.raw_xp_h, a.xp
         FROM hunts AS a 
-        {join_line}
+        JOIN char_at_hunt AS b ON b.hunt_id = a.id
         {where_line}
         {order_line}
         LIMIT :limit"
     );
 
-    let params = match (sql.contains(":id"), sql.contains(":spawn")) {
-        (true, false) => named_params! {":id": id, ":limit": cmd.limit},
+    let params = match (sql.contains(":name"), sql.contains(":spawn")) {
+        (true, false) => named_params! {":name": cmd.name, ":limit": cmd.limit},
         (false, true) => named_params! {":spawn": cmd.spawn, ":limit": cmd.limit},
-        (true, true) => named_params! {":id": id, ":spawn": cmd.spawn, ":limit": cmd.limit},
+        (true, true) => named_params! {":name": cmd.name, ":spawn": cmd.spawn, ":limit": cmd.limit},
         (false, false) => named_params! {":limit": cmd.limit},
     };
 
