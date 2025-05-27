@@ -19,10 +19,10 @@ pub struct ChibiaArgs {
 
 #[derive(Debug, Subcommand)]
 pub enum Chibia {
-    /// Create, update, delete or list characters
+    /// Manage character data
     Chars(CharsCommand),
 
-    /// Add, remove, list, or query hunt logs
+    /// Manage hunt data
     Hunts(HuntsCommand),
 }
 
