@@ -6,14 +6,6 @@ This is a Rust CLI for keeping track of Tibia hunting data. This project mostly 
 
 This is the English spelling of how Brazilian's pronounce Tibia. Since they are the largest player base in Tibia it felt fitting to name the CLI Chibia.
 
-### Roadmap to First Release
-
-- [x] Parse session times and lengths
-- [x] Improve UX for adding hunt logs
-- [x] Add import/export for hunts
-- [ ] Finish readme documentation
-- [ ] Add more information to --helps
-
 ### Features to be added
 - [ ] Add mob_kill/h and looted_item/h stats for hunts
 
@@ -24,10 +16,29 @@ Building from source with cargo.
 ```bash
 git clone https://github.com/Cavenfish/chibia.git
 cd chibia
-cargo build
+cargo build --release
+cp ./target/release/chibia ~/.local/bin
 ```
 
 ### Basic Usage Example
+
+To add hunting logs to the database first export the hunting session from Tibia as a json file. Then you can add the hunt log to the database using `chibia hunts add`. 
+
+```bash
+chibia hunts add --help
+Add new hunt logs
+
+Usage: chibia hunts add [OPTIONS]
+
+Options:
+      --id <ID>                ID of character used on hunt [default: 0]
+      --spawn <SPAWN>          Location of hunt [default: Unknown]
+      --loot-mult <LOOT_MULT>  Loot multiplier during hunt [default: 0]
+      --no-skip                Disable the skip prompt
+  -h, --help                   Print help
+```
+
+If you don't pass id, spawn or loot-mult you will be prompted for it after a preview of the hunt log is shown. This is useful when you have several hunt logs that need to be added but they all are for different characters or spawns. If you pass any of those three parameters it will apply to all hunt logs (unless you agree to skip a log) to be added.
 
 You can preview all stored hunt logs with a simple show command.
 
@@ -92,6 +103,59 @@ ID    Character       Balance    Raw XP/h   Total XP
 10    Homem Um Soco   10.7k      60.9k      21.8k     
 20    Homem Um Soco   12.6k      55.0k      25.5k     
 18    Homem Um Soco   5.5k       52.4k      29.2k 
+```
+
+You can also view the full hunt log data with the show command. The character info at the time of adding the hunt is saved so you know what the stats of your character was at the time of the hunt.
+
+```bash
+chibia hunts show --id 18
+
+Homem Um Soco (Monk):
+  Level:		35
+  Magic Level:		18
+  Fist Fighting:	80
+  Shielding Level:	55
+
+Hunt Info:
+   ID:			18
+   Start Date:		Unknown
+   End Date:		Unknown
+   Duration:		00:09h
+   Spawn:		Upper Spike -3
+   Loot Multiplier:	1
+   Loot:		8.1k
+   Supplies:		2.6k
+   Balance:		5.5k
+   Raw XP:		8.5k (52.4k/h)
+   XP:			29.2k (181.1k/h)
+   Damage:		13.8k (13.8k/h)
+   Healing:		3.7k (3.7k/h)
+Looted Items:
+   -- 1 a small stone
+   -- 1 a wolf tooth chain
+   -- 3 a silver brooch
+   -- 493 a gold coin
+   -- 2 a strange talisman
+   -- 2 a throwing star
+   -- 3 cheese
+   -- 1 a shadow herb
+   -- 1 a yellow piece of cloth
+   -- 1 a potato
+   -- 4 a gauze bandage
+   -- 2 a stone wing
+   -- 2 a flask of embalming fluid
+   -- 1 a cheese cutter
+   -- 2 an earflap
+   -- 2 soft cheese
+   -- 1 rat cheese
+Monsters Killed:
+   -- 8 corym charlatan
+   -- 6 corym skirmisher
+   -- 1 crypt shambler
+   -- 2 demon skeleton
+   -- 10 gargoyle
+   -- 5 ghost
+   -- 20 mummy
 ```
 
 ### Help Pages
